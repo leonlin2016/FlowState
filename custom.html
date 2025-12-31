@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & Social Sharing -->
+    <title>Custom Countdown Timer | FlowState</title>
+    <meta name="description" content="Free online custom countdown timer. Set exact hours, minutes, and seconds. Features audio alarm, loop mode, and visual alerts.">
+    <meta name="keywords" content="countdown, custom timer, online timer, set timer, countdown clock, focus tool">
+    <!-- 社交分享图 (请记得上传一张截图命名为 og-custom.png) -->
+    <meta property="og:image" content="https://perfectscene.cc/og-custom.png">
+    
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --mint-color: #69f0ae; 
+            --mint-dim: rgba(105, 240, 174, 0.08);
+            --alarm-color: #ff5252; /* 红色警报色 */
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 30%, #1a2620 0%, #121212 70%);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .nav {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: var(--mint-color); }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 75vh;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .sr-only-title {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* === Setup View === */
+        #setup-view {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            animation: fadeIn 0.6s ease;
+            align-items: center;
+        }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .time-input {
+            background: transparent;
+            border: none;
+            color: var(--mint-color);
+            font-size: 4.5rem;
+            font-weight: 200;
+            width: 1.6em;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+            outline: none;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s, color 0.3s;
+            font-family: monospace;
+        }
+        
+        .time-input:focus {
+            border-bottom-color: var(--mint-color);
+            background: rgba(105, 240, 174, 0.05);
+            border-radius: 4px;
+        }
+        .time-input::placeholder { color: rgba(105, 240, 174, 0.3); }
+
+        .colon {
+            font-size: 4rem;
+            color: var(--mint-color);
+            padding-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .input-labels {
+            display: flex;
+            gap: 55px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: -20px;
+            opacity: 0.6;
+        }
+
+        .chip-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .chip {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .chip:hover {
+            border-color: var(--mint-color);
+            color: var(--mint-color);
+            background: var(--mint-dim);
+        }
+        .chip.reset {
+            color: var(--alarm-color);
+            border-color: rgba(255, 82, 82, 0.3);
+        }
+        .chip.reset:hover {
+            background: rgba(255, 82, 82, 0.1);
+            border-color: var(--alarm-color);
+        }
+
+        .task-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #333;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 12px;
+            width: 90%;
+            margin: 10px auto;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .task-input:focus { border-bottom-color: var(--mint-color); }
+
+        .btn-start {
+            background: var(--mint-color);
+            color: #051a10;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(105, 240, 174, 0.3);
+        }
+
+        /* === Timer View === */
+        #timer-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+        }
+
+        svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+        circle {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+        }
+        .circle-bg { stroke: #222; }
+        .circle-progress {
+            stroke: var(--mint-color);
+            transition: stroke-dashoffset 1s linear;
+            filter: drop-shadow(0 0 4px var(--mint-color));
+        }
+
+        /* 计时结束时的闪烁动画 */
+        /* 修复后的 CSS */
+@keyframes flash-red {
+    0% { stroke: var(--alarm-color); filter: drop-shadow(0 0 10px var(--alarm-color)); opacity: 1; }
+    50% { stroke: var(--alarm-color); filter: drop-shadow(0 0 2px var(--alarm-color)); opacity: 0.5; }
+    100% { stroke: var(--alarm-color); filter: drop-shadow(0 0 10px var(--alarm-color)); opacity: 1; }
+}
+
+/* 注意这里：删掉了中间的空格，表示“同时拥有这两个类名的元素” */
+.circle-progress.timer-finished {
+    stroke: var(--alarm-color) !important;
+    animation: flash-red 1.5s infinite ease-in-out;
+}
+
+
+        .timer-text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+        }
+        .timer-digits {
+            font-size: 4rem;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-primary);
+        }
+        .timer-label {
+            margin-top: 5px;
+            font-size: 1.1rem;
+            color: var(--mint-color);
+            opacity: 0.9;
+        }
+
+        .controls {
+            margin-top: 50px;
+            display: flex;
+            gap: 20px;
+        }
+        .btn-control {
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-secondary);
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+        .btn-control:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+        .btn-control.stop:hover {
+            border-color: var(--alarm-color);
+            color: var(--alarm-color);
+        }
+        
+        /* Restart 按钮样式 */
+        #btn-restart {
+            border-color: var(--mint-color);
+            color: var(--mint-color);
+            font-weight: bold;
+        }
+        #btn-restart:hover {
+            background: var(--mint-dim);
+        }
+
+        .seo-content {
+            width: 100%;
+            max-width: 700px;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+            border-top: 1px solid #222;
+            padding-top: 40px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .seo-content h2 { font-size: 1.2rem; color: var(--text-primary); margin-bottom: 15px; }
+        .seo-content li { margin-bottom: 8px; }
+
+        @media (max-width: 480px) {
+            .time-input { font-size: 3.5rem; width: 1.5em; }
+            .colon { font-size: 3rem; }
+            .timer-circle { width: 260px; height: 260px; }
+            .timer-digits { font-size: 3rem; }
+            .input-labels { gap: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav">
+        <a href="index.html">← Back to FlowState</a>
+    </nav>
+
+    <main class="main-wrapper">
+        <h1 class="sr-only-title">Custom Countdown Timer</h1>
+
+        <!-- 1. 设置界面 -->
+        <div id="setup-view">
+            <div style="text-align:center; color: var(--text-secondary); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Tap numbers to edit</div>
+            
+            <div class="time-input-group">
+                <input type="text" inputmode="numeric" class="time-input" id="in-h" placeholder="00" value="00" 
+                    oninput="handleTyping(this)" 
+                    onblur="validateBlur(this, false)">
+                <span class="colon">:</span>
+                <input type="text" inputmode="numeric" class="time-input" id="in-m" placeholder="00" value="00" 
+                    oninput="handleTyping(this)" 
+                    onblur="validateBlur(this, true)">
+                <span class="colon">:</span>
+                <input type="text" inputmode="numeric" class="time-input" id="in-s" placeholder="00" value="00" 
+                    oninput="handleTyping(this)" 
+                    onblur="validateBlur(this, true)">
+            </div>
+            <div class="input-labels">
+                <span>HR</span>
+                <span>MIN</span>
+                <span>SEC</span>
+            </div>
+
+            <div class="chip-container">
+                <div class="chip" onclick="addTime(60)">+1m</div>
+                <div class="chip" onclick="addTime(300)">+5m</div>
+                <div class="chip" onclick="addTime(600)">+10m</div>
+                <div class="chip" onclick="addTime(1800)">+30m</div>
+                <div class="chip reset" onclick="resetSetup()">Reset</div>
+            </div>
+
+            <input type="text" id="task-name" class="task-input" placeholder="Task Name (e.g. Reading)" autocomplete="off">
+
+            <button class="btn-start" onclick="startTimer()">START TIMER</button>
+        </div>
+
+        <!-- 2. 计时界面 -->
+        <div id="timer-view">
+            <div class="timer-circle">
+                <svg>
+                    <circle class="circle-bg" cx="160" cy="160" r="150"></circle>
+                    <circle class="circle-progress" id="progress-ring" cx="160" cy="160" r="150"></circle>
+                </svg>
+                <div class="timer-text-overlay">
+                    <div class="timer-digits" id="timer-digits">00:00</div>
+                    <div class="timer-label" id="timer-label-display"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-control" id="btn-pause" onclick="togglePause()">PAUSE</button>
+                <!-- 新增：重来按钮（默认隐藏） -->
+                <button class="btn-control" id="btn-restart" onclick="restartTimer()" style="display:none">AGAIN</button>
+                <button class="btn-control stop" onclick="stopTimer()">STOP</button>
+            </div>
+        </div>
+    </main>
+
+    <article class="seo-content">
+        <h2>About This Tool</h2>
+        <p>FlowState Custom Timer allows you to set a precise countdown for any activity. Whether it's 45 minutes for deep work or 3 minutes for brewing tea, you are in control.</p>
+        <h2>How to use</h2>
+        <ul>
+            <li><strong>Type:</strong> Click directly on the numbers (00:00:00) to type your desired time.</li>
+            <li><strong>Add:</strong> Use the +5m buttons to quickly add time.</li>
+        </ul>
+    </article>
+
+    <audio id="alarm-sound" loop preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+
+    <script>
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let interval = null;
+        let isPaused = false;
+        
+        const setupView = document.getElementById('setup-view');
+        const timerView = document.getElementById('timer-view');
+        const timerDigits = document.getElementById('timer-digits');
+        const timerLabel = document.getElementById('timer-label-display');
+        const taskInput = document.getElementById('task-name');
+        const pauseBtn = document.getElementById('btn-pause');
+        const restartBtn = document.getElementById('btn-restart');
+        const alarmSound = document.getElementById('alarm-sound');
+        
+        const inH = document.getElementById('in-h');
+        const inM = document.getElementById('in-m');
+        const inS = document.getElementById('in-s');
+        
+        const circle = document.getElementById('progress-ring');
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = 0;
+
+        // === 1. 增强版防手滑关闭机制 ===
+window.addEventListener('beforeunload', function (e) {
+    // 只有在：计时中 + 没暂停 + 剩余时间大于0 时才拦截
+    if (setupView.style.display === 'none' && !isPaused && remainingSeconds > 0) {
+        // 现代浏览器标准写法
+        e.preventDefault(); 
+        // Chrome 需要设置这个属性
+        e.returnValue = ''; 
+        // 旧版浏览器兼容
+        return ''; 
+    }
+});
+
+
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+
+        function handleTyping(el) {
+            el.value = el.value.replace(/[^0-9]/g, '');
+            if (el.value.length > 2) {
+                el.value = el.value.slice(0, 2);
+            }
+        }
+
+        function validateBlur(el, isMax59) {
+            let val = parseInt(el.value);
+            if (isNaN(val)) val = 0;
+            if (isMax59 && val > 59) val = 59;
+            el.value = pad(val);
+        }
+
+        function addTime(secondsToAdd) {
+            let h = parseInt(inH.value) || 0;
+            let m = parseInt(inM.value) || 0;
+            let s = parseInt(inS.value) || 0;
+            
+            let currentTotal = h * 3600 + m * 60 + s;
+            currentTotal += secondsToAdd;
+
+            updateInputsFromSeconds(currentTotal);
+        }
+
+        function resetSetup() {
+            inH.value = "00";
+            inM.value = "00";
+            inS.value = "00";
+            taskInput.value = '';
+        }
+
+        function updateInputsFromSeconds(sec) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = sec % 60;
+            inH.value = pad(h);
+            inM.value = pad(m);
+            inS.value = pad(s);
+        }
+
+        function startTimer() {
+            validateBlur(inM, true);
+            validateBlur(inS, true);
+            validateBlur(inH, false);
+
+            let h = parseInt(inH.value) || 0;
+            let m = parseInt(inM.value) || 0;
+            let s = parseInt(inS.value) || 0;
+            
+            totalSeconds = h * 3600 + m * 60 + s;
+
+            if (totalSeconds <= 0) return;
+
+            remainingSeconds = totalSeconds;
+            isPaused = false;
+
+            setupView.style.display = 'none';
+            timerView.style.display = 'flex';
+            
+            const taskName = taskInput.value.trim();
+            timerLabel.textContent = taskName || 'FOCUS';
+            timerLabel.style.color = "var(--mint-color)"; // 重置颜色
+            document.title = "Starting...";
+
+            // 确保按钮状态正确
+            pauseBtn.style.display = 'inline-block';
+            restartBtn.style.display = 'none';
+            circle.classList.remove('timer-finished'); // 移除闪烁
+
+            updateTimerDisplay();
+            interval = setInterval(tick, 1000);
+        }
+
+        // === 2. 新增：重来一次 ===
+        function restartTimer() {
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+            startTimer(); // 直接复用输入框里的值重新开始
+        }
+
+        function tick() {
+            if (!isPaused) {
+                remainingSeconds--;
+                updateTimerDisplay();
+                if (remainingSeconds <= 0) finishTimer();
+            }
+        }
+
+        function updateTimerDisplay() {
+            const h = Math.floor(remainingSeconds / 3600);
+            const m = Math.floor((remainingSeconds % 3600) / 60);
+            const s = remainingSeconds % 60;
+            
+            let timeStr = "";
+            if (h > 0) {
+                timeStr = `${pad(h)}:${pad(m)}:${pad(s)}`;
+            } else {
+                timeStr = `${pad(m)}:${pad(s)}`;
+            }
+            
+            timerDigits.textContent = timeStr;
+            document.title = `${timeStr} - ${taskInput.value || 'Timer'}`;
+
+            const offset = circumference - (remainingSeconds / totalSeconds) * circumference;
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? "RESUME" : "PAUSE";
+            pauseBtn.style.borderColor = isPaused ? "var(--mint-color)" : "var(--text-secondary)";
+            pauseBtn.style.color = isPaused ? "var(--mint-color)" : "var(--text-secondary)";
+        }
+
+        function stopTimer() {
+            clearInterval(interval);
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+            
+            setupView.style.display = 'flex';
+            timerView.style.display = 'none';
+            document.title = "Custom Timer | FlowState";
+            
+            // 重置 UI 状态
+            pauseBtn.textContent = "PAUSE";
+            pauseBtn.style.borderColor = "";
+            pauseBtn.style.color = "";
+            pauseBtn.style.display = 'inline-block';
+            restartBtn.style.display = 'none';
+            
+            circle.style.strokeDashoffset = 0;
+            circle.classList.remove('timer-finished'); // 停止闪烁
+        }
+
+        function finishTimer() {
+            clearInterval(interval);
+            remainingSeconds = 0;
+            updateTimerDisplay();
+            
+            alarmSound.play().catch(e => console.log("Audio play blocked", e));
+            
+            document.title = "TIME IS UP!";
+            timerLabel.textContent = "TIME IS UP";
+            timerLabel.style.color = "var(--alarm-color)";
+            
+            // === 3. 视觉反馈：添加闪烁类 ===
+            circle.classList.add('timer-finished');
+
+            // === 4. 按钮切换：隐藏暂停，显示重来 ===
+            pauseBtn.style.display = 'none';
+            restartBtn.style.display = 'inline-block';
+        }
+    </script>
+</body>
+</html>
