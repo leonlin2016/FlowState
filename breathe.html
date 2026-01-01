@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decompress | FlowState</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888888;
+            --mint-color: #69f0ae;
+            --circle-base: rgba(105, 240, 174, 0.2);
+            --circle-active: rgba(105, 240, 174, 0.8);
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Nav --- */
+        .nav {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1000px;
+            z-index: 10;
+        }
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .nav a:hover { color: var(--mint-color); }
+
+        /* --- Main Container --- */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- The Breathing Circle --- */
+        .circle-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle {
+            background-color: var(--mint-color);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 1;
+            opacity: 0.1; /* 初始透明度 */
+            transform: scale(0.8); /* 初始大小 */
+            box-shadow: 0 0 40px var(--mint-color);
+            /* 动画过渡由 JS 动态控制 duration */
+            transition: transform ease-in-out, opacity ease-in-out; 
+            will-change: transform, opacity;
+        }
+
+        /* --- Text & Instructions --- */
+        .instruction {
+            position: absolute;
+            z-index: 2;
+            font-size: 1.5rem;
+            font-weight: 300;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .sub-text {
+            margin-top: 350px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+            position: absolute;
+        }
+
+        /* --- Controls --- */
+        .btn-main {
+            margin-top: 50px;
+            background: transparent;
+            border: 1px solid var(--mint-color);
+            color: var(--mint-color);
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: absolute;
+            bottom: 10%;
+        }
+
+        .btn-main:hover {
+            background: var(--mint-color);
+            color: #000;
+            box-shadow: 0 0 20px rgba(105, 240, 174, 0.4);
+        }
+
+        /* 状态辅助类 */
+        .hidden { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav">
+        <a href="index.html">← Back to FlowState</a>
+        <span style="font-size: 0.8rem; color: var(--text-secondary);">DECOMPRESS</span>
+    </nav>
+
+    <div class="container">
+        <div class="circle-container">
+            <div class="circle" id="breathCircle"></div>
+            <div class="instruction" id="textDisplay">Ready?</div>
+        </div>
+        
+        <div class="sub-text" id="subText">4-7-8 Breathing Technique</div>
+
+        <button class="btn-main" id="toggleBtn" onclick="toggleBreathing()">Start Session</button>
+    </div>
+
+    <script>
+        const circle = document.getElementById('breathCircle');
+        const textDisplay = document.getElementById('textDisplay');
+        const toggleBtn = document.getElementById('toggleBtn');
+        
+        let isRunning = false;
+        let animationFrame;
+
+        // 核心逻辑：使用 Promise 封装 setTimeout，实现同步的 async/await 流程
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function startBreathingCycle() {
+            while (isRunning) {
+                // 1. 吸气 (Inhale) - 4秒
+                textDisplay.innerText = "Inhale...";
+                circle.style.transition = "all 4s cubic-bezier(0.4, 0, 0.2, 1)"; // 模拟吸气的急促到平缓
+                circle.style.transform = "scale(1.2)"; 
+                circle.style.opacity = "0.8";
+                
+                await wait(4000);
+                if (!isRunning) break; // 随时检测是否停止
+
+                // 2. 屏息 (Hold) - 7秒
+                textDisplay.innerText = "Hold";
+                // 保持状态，不改变 transform
+                // 稍微改变一点点 opacity 模拟憋气时的静止感
+                circle.style.transition = "opacity 0.5s"; 
+                circle.style.opacity = "0.6";
+
+                await wait(7000);
+                if (!isRunning) break;
+
+                // 3. 呼气 (Exhale) - 8秒
+                textDisplay.innerText = "Exhale...";
+                circle.style.transition = "all 8s cubic-bezier(0.4, 0, 0.2, 1)"; // 呼气通常比较漫长
+                circle.style.transform = "scale(0.8)";
+                circle.style.opacity = "0.1";
+
+                await wait(8000);
+                if (!isRunning) break;
+            }
+        }
+
+        function toggleBreathing() {
+            if (!isRunning) {
+                // 开始
+                isRunning = true;
+                toggleBtn.innerText = "Stop Session";
+                toggleBtn.style.borderColor = "#ff5252";
+                toggleBtn.style.color = "#ff5252";
+                
+                // 立即开始第一个循环
+                startBreathingCycle();
+            } else {
+                // 停止
+                resetState();
+            }
+        }
+
+        function resetState() {
+            isRunning = false;
+            
+            // UI 重置
+            textDisplay.innerText = "Ready?";
+            toggleBtn.innerText = "Start Session";
+            toggleBtn.style.borderColor = "var(--mint-color)";
+            toggleBtn.style.color = "var(--mint-color)";
+            
+            // 动画重置
+            circle.style.transition = "all 1s ease-out";
+            circle.style.transform = "scale(0.8)";
+            circle.style.opacity = "0.1";
+        }
+    </script>
+</body>
+</html>
