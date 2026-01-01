@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks | FlowState</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Nav --- */
+        .nav {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav a:hover { color: var(--accent-green); }
+
+        /* --- Main Content --- */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 20px;
+        }
+
+        h1 { font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; font-size: 1.8rem; }
+
+        /* --- Input Area --- */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: var(--surface-color);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 5px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        /* 项目选择下拉框 */
+        select {
+            background: rgba(0,0,0,0.3);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 5px 10px;
+            outline: none;
+            cursor: pointer;
+            max-width: 130px;
+            font-size: 0.85rem;
+        }
+        select:hover { border-color: var(--accent-blue); color: white; }
+
+        .btn-add {
+            background: var(--accent-green);
+            border: none;
+            width: 40px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #0f172a;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .btn-add:hover { opacity: 0.9; }
+
+        /* --- Task List --- */
+        .task-list { list-style: none; padding-bottom: 50px; }
+
+        .task-item {
+            background: var(--surface-color);
+            margin-bottom: 10px;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.1);
+            background: #253146;
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* Project Tag */
+        .project-tag {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(59, 130, 246, 0.15); /* Default blue tint */
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .task-item.done .checkbox {
+            background: var(--text-secondary);
+            border-color: var(--text-secondary);
+            color: var(--bg-color);
+        }
+        .task-item.done .task-text {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+        .task-item.done .project-tag {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0; /* 默认隐藏 */
+            transition: opacity 0.2s;
+        }
+        .task-item:hover .actions { opacity: 1; }
+        
+        /* Mobile optimization: always show actions on touch devices if needed, 
+           but for cleanliness we keep hover. */
+
+        .btn-icon {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-play { color: var(--accent-green); }
+        .btn-play:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); }
+        
+        .btn-del { color: #ef4444; }
+        .btn-del:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="nav">
+        <a href="index.html">
+            <span style="font-size: 1.2rem;">‹</span> Back to Timer
+        </a>
+        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px;">TASK QUEUE</span>
+    </nav>
+
+    <div class="container">
+        <h1>What's next?</h1>
+        
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Add a new task..." onkeypress="handleEnter(event)">
+            <!-- 这里的选项会由 JS 自动填充 -->
+            <select id="projectSelect"></select>
+            <button class="btn-add" onclick="addTask()">＋</button>
+        </div>
+
+        <ul class="task-list" id="taskList">
+            <!-- Tasks will be injected here -->
+        </ul>
+    </div>
+
+    <script>
+        // --- 1. 读取主页的数据库 (获取项目列表) ---
+        let db = { projects: [] };
+        try {
+            const raw = localStorage.getItem('flowStateDB');
+            if (raw) db = JSON.parse(raw);
+            // 如果完全没有项目，给一个默认的
+            if (!db.projects || db.projects.length === 0) {
+                db.projects = [{id: 'default', name: 'General', color: '#94a3b8'}];
+            }
+        } catch (e) {
+            console.error("DB Error", e);
+            db.projects = [{id: 'default', name: 'General', color: '#94a3b8'}];
+        }
+
+        // --- 2. 渲染下拉菜单 ---
+        const projectSelect = document.getElementById('projectSelect');
+        projectSelect.innerHTML = db.projects.map(p => 
+            `<option value="${p.id}">${p.name}</option>`
+        ).join('');
+
+        // --- 3. 任务管理逻辑 ---
+        let tasks = JSON.parse(localStorage.getItem('flowTasks')) || [];
+
+        function saveTasks() {
+            localStorage.setItem('flowTasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            const projectId = projectSelect.value; // 获取当前选中的项目ID
+            
+            if (!text) return;
+
+            tasks.unshift({ 
+                id: Date.now(), 
+                text: text, 
+                projectId: projectId, 
+                done: false 
+            });
+            input.value = '';
+            saveTasks();
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') addTask();
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.done = !task.done;
+                saveTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+        }
+
+        // --- 4. 核心跳转逻辑 ---
+        function startFocus(text, projectId) {
+            // mode=stopwatch: 强制使用正向计时
+            // projectId=...: 强制切换到对应项目
+            // autoStart=true: 自动开始
+            const url = `index.html?task=${encodeURIComponent(text)}&projectId=${projectId}&mode=stopwatch&autoStart=true`;
+            window.location.href = url;
+        }
+
+        // 辅助函数：根据ID找项目颜色和名称
+        function getProjectInfo(pid) {
+            const p = db.projects.find(i => i.id === pid);
+            return p ? p : { name: 'General', color: '#94a3b8' };
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = '';
+
+            if (tasks.length === 0) {
+                list.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:50px; opacity:0.5;">No tasks yet. Add one above!</div>`;
+                return;
+            }
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.done ? 'done' : ''}`;
+                
+                // 获取项目信息用于显示标签
+                const project = getProjectInfo(task.projectId);
+                
+                // 动态生成标签样式（使用项目颜色的淡化版作为背景）
+                // 简单的处理：文字用项目色，背景用透明度
+                const tagStyle = `color: ${project.color}; border: 1px solid ${project.color}40; background: ${project.color}10;`;
+
+                li.innerHTML = `
+                    <div class="task-left" onclick="toggleTask(${task.id})">
+                        <div class="checkbox">${task.done ? '✓' : ''}</div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <span class="task-text" style="font-weight:500;">${task.text}</span>
+                            <span class="project-tag" style="${tagStyle}">${project.name}</span>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        ${!task.done ? `
+                        <button class="btn-icon btn-play" onclick="startFocus('${task.text}', '${task.projectId}')" title="Start Tracking">
+                            ▶
+                        </button>` : ''}
+                        <button class="btn-icon btn-del" onclick="deleteTask(${task.id})" title="Delete">
+                            ✕
+                        </button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // Init
+        renderTasks();
+    </script>
+</body>
+</html>
