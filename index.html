@@ -446,6 +446,7 @@ class TimeMaster {
         this.cacheDOM();
         this.bindEvents();
         this.renderProjectSelect();
+        this.checkURLParams(); 
         this.updateUI();
         setTimeout(() => this.initCharts(), 100);
     }
@@ -479,6 +480,43 @@ class TimeMaster {
             }
         });
     }
+    // 👉 把这段代码复制进去：
+    checkURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        const task = params.get('task');
+        const pid = params.get('projectId');
+        const mode = params.get('mode');
+        const auto = params.get('autoStart');
+
+        // 1. 切换项目
+        if (pid && this.getProject(pid)) {
+            this.state.selectedProjectId = pid;
+            this.dom.projectSelect.value = pid;
+        }
+
+        // 2. 切换模式 (番茄钟/秒表)
+        if (mode === 'stopwatch' || mode === 'pomodoro') {
+            this.setMode(mode);
+        }
+
+        // 3. 显示任务名称
+        if (task) {
+            const display = document.getElementById('current-task-display');
+            if (display) display.textContent = task;
+            document.title = `▶ ${task}`;
+        }
+
+        // 4. 自动开始
+        if (auto === 'true') {
+            this.start();
+        }
+        
+        // 5. 清理地址栏参数 (防止刷新页面重复触发)
+        if (task || pid || mode) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+
     
     // Audio Logic
     audio = {
