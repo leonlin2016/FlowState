@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO & Meta -->
     <title>Decompress | FlowState</title>
+    <meta name="description" content="Relieve stress with the 4-7-8 breathing technique. A minimalist visual guide to help you decompress and regain focus.">
+    <meta property="og:title" content="FlowState Decompress">
+    <meta property="og:description" content="Take a deep breath. 4-7-8 visual breathing guide.">
+    <meta property="og:image" content="https://perfectscene.cc/preview-breathe.png">
+    <meta property="og:url" content="https://perfectscene.cc/breathe.html">
+
     <style>
         :root {
             --bg-color: #121212;
             --text-primary: #e0e0e0;
             --text-secondary: #888888;
             --mint-color: #69f0ae;
-            --circle-base: rgba(105, 240, 174, 0.2);
-            --circle-active: rgba(105, 240, 174, 0.8);
+            --surface-color: #1e1e1e;
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -25,7 +32,11 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
+            /* 允许垂直滚动，但禁止水平滚动 */
+            overflow-x: hidden;
+            overflow-y: auto;
+            user-select: none; 
+            -webkit-user-select: none;
         }
 
         /* --- Nav --- */
@@ -35,8 +46,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1000px;
+            max-width: 800px;
             z-index: 10;
+            position: absolute; /* 绝对定位，不占流 */
+            top: 0;
         }
         .nav a {
             color: var(--text-secondary);
@@ -46,15 +59,16 @@
         }
         .nav a:hover { color: var(--mint-color); }
 
-        /* --- Main Container --- */
-        .container {
-            flex: 1;
+        /* --- Main View (Full Screen Height) --- */
+        .main-view {
+            height: 100vh; /* 占满一屏 */
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 100%;
             position: relative;
+            flex-shrink: 0; /* 防止被压缩 */
         }
 
         /* --- The Breathing Circle --- */
@@ -74,11 +88,21 @@
             border-radius: 50%;
             position: absolute;
             z-index: 1;
-            opacity: 0.1; /* 初始透明度 */
-            transform: scale(0.8); /* 初始大小 */
-            box-shadow: 0 0 40px var(--mint-color);
-            /* 动画过渡由 JS 动态控制 duration */
-            transition: transform ease-in-out, opacity ease-in-out; 
+            opacity: 0.1;
+            transform: scale(0.8);
+            box-shadow: 0 0 60px var(--mint-color);
+            will-change: transform, opacity;
+        }
+        
+        .circle-inner {
+            background-color: var(--mint-color);
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 1;
+            opacity: 0.2;
+            transform: scale(0.8);
             will-change: transform, opacity;
         }
 
@@ -86,11 +110,13 @@
         .instruction {
             position: absolute;
             z-index: 2;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 300;
             text-align: center;
             pointer-events: none;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums; 
         }
 
         .sub-text {
@@ -99,6 +125,7 @@
             font-size: 0.9rem;
             opacity: 0.7;
             position: absolute;
+            transition: opacity 0.5s;
         }
 
         /* --- Controls --- */
@@ -115,110 +142,311 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             position: absolute;
-            bottom: 10%;
+            bottom: 15%; /* 稍微抬高一点 */
         }
 
         .btn-main:hover {
-            background: var(--mint-color);
-            color: #000;
-            box-shadow: 0 0 20px rgba(105, 240, 174, 0.4);
+            background: rgba(105, 240, 174, 0.1);
+            box-shadow: 0 0 20px rgba(105, 240, 174, 0.2);
+        }
+        
+        .btn-main.stop {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+        .btn-main.stop:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+            box-shadow: none;
         }
 
-        /* 状态辅助类 */
-        .hidden { opacity: 0; pointer-events: none; }
+        /* --- Scroll Indicator --- */
+        .scroll-hint {
+            position: absolute;
+            bottom: 20px;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        /* --- Info Section (Below the fold) --- */
+        .info-section {
+            width: 100%;
+            max-width: 800px;
+            padding: 60px 20px;
+            background: var(--bg-color);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 700px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+
+        .info-card {
+            background: var(--surface-color);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .info-card h3 {
+            color: var(--mint-color);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        .step-list li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        .step-list li::before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            background: rgba(105, 240, 174, 0.2);
+            color: var(--mint-color);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
 
     <nav class="nav">
         <a href="index.html">← Back to FlowState</a>
-        <span style="font-size: 0.8rem; color: var(--text-secondary);">DECOMPRESS</span>
+        <span style="font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 1px;">DECOMPRESS</span>
     </nav>
 
-    <div class="container">
+    <!-- Screen 1: The Breathing Tool -->
+    <div class="main-view">
         <div class="circle-container">
             <div class="circle" id="breathCircle"></div>
+            <div class="circle-inner" id="breathCircleInner"></div>
             <div class="instruction" id="textDisplay">Ready?</div>
         </div>
         
         <div class="sub-text" id="subText">4-7-8 Breathing Technique</div>
 
         <button class="btn-main" id="toggleBtn" onclick="toggleBreathing()">Start Session</button>
+        
+        <div class="scroll-hint" onclick="document.querySelector('.info-section').scrollIntoView({behavior: 'smooth'})">
+            ⌄
+        </div>
+    </div>
+
+    <!-- Screen 2: The Explanation -->
+    <div class="info-section">
+        <div class="info-grid">
+            
+            <!-- Card 1: The Technique -->
+            <div class="info-card">
+                <h3>🌊 The 4-7-8 Technique</h3>
+                <p>Developed by Dr. Andrew Weil, this rhythmic breathing pattern acts as a natural tranquilizer for the nervous system.</p>
+                <ul class="step-list">
+                    <li><strong>Inhale</strong> quietly through the nose for <strong>4 seconds</strong>.</li>
+                    <li><strong>Hold</strong> the breath for <strong>7 seconds</strong>.</li>
+                    <li><strong>Exhale</strong> completely through the mouth for <strong>8 seconds</strong>.</li>
+                </ul>
+                <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">
+                    * This ratio is critical. The long exhale activates the parasympathetic nervous system, reducing anxiety.
+                </p>
+            </div>
+
+            <!-- Card 2: App Experience -->
+            <div class="info-card">
+                <h3>✨ Immersive Experience</h3>
+                <p>Designed to help you close your eyes and focus inward.</p>
+                
+                <div style="margin-top: 20px;">
+                    <strong style="color:white; display:block; margin-bottom:5px;">📳 Haptic Feedback</strong>
+                    <p style="margin-bottom:15px;">Feel the rhythm. Your phone will vibrate gently to signal when to inhale, hold, and exhale.</p>
+                    
+                    <strong style="color:white; display:block; margin-bottom:5px;">💡 Always On</strong>
+                    <p>Screen Wake Lock is active during the session, so your phone won't sleep while you relax.</p>
+                </div>
+            </div>
+
+        </div>
+        
+        <p style="text-align: center; margin-top: 40px; font-size: 0.8rem; color: var(--text-secondary); opacity: 0.5;">
+            FlowState Decompress &copy; 2024
+        </p>
     </div>
 
     <script>
         const circle = document.getElementById('breathCircle');
+        const circleInner = document.getElementById('breathCircleInner');
         const textDisplay = document.getElementById('textDisplay');
+        const subText = document.getElementById('subText');
         const toggleBtn = document.getElementById('toggleBtn');
+        const scrollHint = document.querySelector('.scroll-hint');
         
         let isRunning = false;
-        let animationFrame;
+        let wakeLock = null;
 
-        // 核心逻辑：使用 Promise 封装 setTimeout，实现同步的 async/await 流程
         const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+        // 触觉反馈 (仅支持 Android / 部分 iOS)
+        function vibrate(pattern) {
+            if (navigator.vibrate) navigator.vibrate(pattern);
+        }
+
+        // 申请屏幕常亮
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log(`${err.name}, ${err.message}`);
+            }
+        }
+
+        // 释放屏幕常亮
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        // 设置动画状态
+        function setAnimationState(scale, opacity, duration, bezier) {
+            const transition = `all ${duration}s ${bezier}`;
+            
+            circle.style.transition = transition;
+            circle.style.transform = `scale(${scale})`;
+            circle.style.opacity = opacity;
+
+            circleInner.style.transition = transition;
+            circleInner.style.transform = `scale(${scale * 0.9})`; 
+            circleInner.style.opacity = parseFloat(opacity) + 0.1;
+        }
+
         async function startBreathingCycle() {
+            // 3秒倒计时
+            subText.style.opacity = '0'; 
+            scrollHint.style.opacity = '0'; // 隐藏滚动提示
+            
+            for(let i=3; i>0; i--) {
+                if (!isRunning) return;
+                textDisplay.innerText = `Starting in ${i}...`;
+                await wait(1000);
+            }
+
             while (isRunning) {
-                // 1. 吸气 (Inhale) - 4秒
-                textDisplay.innerText = "Inhale...";
-                circle.style.transition = "all 4s cubic-bezier(0.4, 0, 0.2, 1)"; // 模拟吸气的急促到平缓
-                circle.style.transform = "scale(1.2)"; 
-                circle.style.opacity = "0.8";
+                // --- 1. 吸气 (Inhale) - 4秒 ---
+                if (!isRunning) break;
+                textDisplay.innerText = "Inhale";
+                vibrate(100); 
                 
-                await wait(4000);
-                if (!isRunning) break; // 随时检测是否停止
+                setAnimationState(1.3, "0.6", 4, "cubic-bezier(0.4, 0, 0.2, 1)");
+                
+                for(let i=1; i<=4; i++) {
+                    if(!isRunning) break;
+                    await wait(1000);
+                }
 
-                // 2. 屏息 (Hold) - 7秒
-                textDisplay.innerText = "Hold";
-                // 保持状态，不改变 transform
-                // 稍微改变一点点 opacity 模拟憋气时的静止感
-                circle.style.transition = "opacity 0.5s"; 
-                circle.style.opacity = "0.6";
-
-                await wait(7000);
+                // --- 2. 屏息 (Hold) - 7秒 ---
                 if (!isRunning) break;
+                vibrate([50, 50]); 
+                
+                setAnimationState(1.25, "0.5", 0.5, "ease");
+                
+                for(let i=7; i>0; i--) {
+                    if(!isRunning) break;
+                    textDisplay.innerText = `Hold (${i})`; 
+                    await wait(1000);
+                }
 
-                // 3. 呼气 (Exhale) - 8秒
-                textDisplay.innerText = "Exhale...";
-                circle.style.transition = "all 8s cubic-bezier(0.4, 0, 0.2, 1)"; // 呼气通常比较漫长
-                circle.style.transform = "scale(0.8)";
-                circle.style.opacity = "0.1";
-
-                await wait(8000);
+                // --- 3. 呼气 (Exhale) - 8秒 ---
                 if (!isRunning) break;
+                textDisplay.innerText = "Exhale";
+                vibrate(200); 
+                
+                setAnimationState(0.8, "0.1", 8, "cubic-bezier(0.4, 0, 0.2, 1)");
+
+                for(let i=1; i<=8; i++) {
+                    if(!isRunning) break;
+                    await wait(1000);
+                }
             }
         }
 
         function toggleBreathing() {
             if (!isRunning) {
-                // 开始
+                // Start
                 isRunning = true;
-                toggleBtn.innerText = "Stop Session";
-                toggleBtn.style.borderColor = "#ff5252";
-                toggleBtn.style.color = "#ff5252";
+                requestWakeLock();
                 
-                // 立即开始第一个循环
+                toggleBtn.innerText = "End Session";
+                toggleBtn.classList.add('stop');
+                
                 startBreathingCycle();
             } else {
-                // 停止
+                // Stop
                 resetState();
             }
         }
 
         function resetState() {
             isRunning = false;
+            releaseWakeLock();
             
-            // UI 重置
+            // UI Reset
             textDisplay.innerText = "Ready?";
-            toggleBtn.innerText = "Start Session";
-            toggleBtn.style.borderColor = "var(--mint-color)";
-            toggleBtn.style.color = "var(--mint-color)";
+            subText.style.opacity = '1';
+            scrollHint.style.opacity = '0.5';
             
-            // 动画重置
-            circle.style.transition = "all 1s ease-out";
-            circle.style.transform = "scale(0.8)";
-            circle.style.opacity = "0.1";
+            toggleBtn.innerText = "Start Session";
+            toggleBtn.classList.remove('stop');
+            
+            // Animation Reset
+            setAnimationState(0.8, "0.1", 1, "ease-out");
         }
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isRunning) {
+                resetState();
+            }
+        });
     </script>
 </body>
 </html>
