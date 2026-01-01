@@ -3,8 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasks | FlowState</title>
+    <!-- 1. 优化 Title：包含品牌名和核心功能 -->
+    <title>Task Queue - FlowState Focus Timer</title>
+
+    <!-- 2. Meta Description：这是搜索结果里显示的那两行字，至关重要 -->
+    <meta name="description" content="Manage your daily tasks and seamlessly transition into deep work. FlowState Task Queue features drag-and-drop sorting, project tagging, and direct timer integration.">
+
+    <!-- 3. 关键词 Keywords -->
+    <meta name="keywords" content="focus timer, todo list, task manager, pomodoro, flow state, productivity tool, dark mode">
+
+    <!-- 4. Open Graph (OG) Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FlowState Task Queue">
+    <meta property="og:description" content="Plan your work, then click play to focus. The minimal task manager for deep work.">
+    <meta property="og:image" content="https://perfectscene.cc/preview-tasks.png">
+    <meta property="og:url" content="https://perfectscene.cc/tasks.html">
+
+    <!-- 5. 移动端优化 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- 引入拖拽库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
     <style>
         :root {
             --bg-color: #0f172a;
@@ -56,9 +77,30 @@
             width: 100%;
             max-width: 600px;
             padding: 0 20px;
+            /* 增加底部 padding，防止内容贴底 */
+            padding-bottom: 40px; 
         }
 
-        h1 { font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; font-size: 1.8rem; }
+        /* Header Row with Clear Button */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 { font-weight: 800; letter-spacing: -0.5px; font-size: 1.8rem; margin: 0; }
+        
+        .btn-clear {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .btn-clear:hover { background: rgba(255,255,255,0.05); color: #ef4444; }
 
         /* --- Input Area --- */
         .input-group {
@@ -82,7 +124,6 @@
             outline: none;
         }
         
-        /* 项目选择下拉框 */
         select {
             background: rgba(0,0,0,0.3);
             color: var(--text-secondary);
@@ -110,7 +151,7 @@
         .btn-add:hover { opacity: 0.9; }
 
         /* --- Task List --- */
-        .task-list { list-style: none; padding-bottom: 50px; }
+        .task-list { list-style: none; padding-bottom: 30px; }
 
         .task-item {
             background: var(--surface-color);
@@ -120,12 +161,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s;
+            transition: transform 0.2s, background 0.2s;
             border: 1px solid transparent;
+            cursor: grab; 
         }
+        .task-item:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.4; background: var(--accent-blue); }
 
         .task-item:hover {
-            transform: translateY(-2px);
             border-color: rgba(255,255,255,0.1);
             background: #253146;
         }
@@ -135,7 +178,7 @@
             align-items: center;
             gap: 15px;
             flex: 1;
-            cursor: pointer;
+            padding-right: 10px;
         }
 
         /* Project Tag */
@@ -143,12 +186,11 @@
             font-size: 0.7rem;
             padding: 3px 8px;
             border-radius: 4px;
-            background: rgba(59, 130, 246, 0.15); /* Default blue tint */
-            color: var(--accent-blue);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             white-space: nowrap;
+            display: inline-block;
         }
 
         .checkbox {
@@ -161,6 +203,7 @@
             justify-content: center;
             transition: all 0.2s;
             flex-shrink: 0;
+            cursor: pointer;
         }
         
         .task-item.done .checkbox {
@@ -182,13 +225,11 @@
         .actions {
             display: flex;
             gap: 8px;
-            opacity: 0; /* 默认隐藏 */
+            opacity: 0;
             transition: opacity 0.2s;
         }
         .task-item:hover .actions { opacity: 1; }
-        
-        /* Mobile optimization: always show actions on touch devices if needed, 
-           but for cleanliness we keep hover. */
+        @media (max-width: 600px) { .actions { opacity: 1; } }
 
         .btn-icon {
             background: rgba(255,255,255,0.05);
@@ -203,12 +244,82 @@
             justify-content: center;
             transition: all 0.2s;
         }
-        
         .btn-play { color: var(--accent-green); }
         .btn-play:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); }
-        
         .btn-del { color: #ef4444; }
         .btn-del:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
+
+        /* --- 编辑模式样式 --- */
+        .edit-input {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--accent-blue);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+        }
+
+        /* --- 空状态插画样式 --- */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            animation: fadeIn 0.5s ease;
+        }
+        .empty-icon { font-size: 4rem; margin-bottom: 15px; opacity: 0.8; display: block; }
+        .empty-text { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 5px; }
+        .empty-sub { font-size: 0.9rem; opacity: 0.7; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Features Section (底部功能介绍) --- */
+        .features-section {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            opacity: 0.8; /* 稍微淡一点，不抢视觉重心 */
+            transition: opacity 0.3s;
+        }
+        .features-section:hover { opacity: 1; }
+
+        .features-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 两列布局 */
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .features-grid { grid-template-columns: 1fr; } /* 手机端变单列 */
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            border: 1px solid transparent;
+            transition: background 0.2s;
+        }
+        .feature-card:hover { background: rgba(255,255,255,0.06); }
+
+        .feature-icon { font-size: 1.5rem; line-height: 1; }
+        .feature-content h3 { font-size: 0.95rem; margin-bottom: 4px; color: var(--text-primary); }
+        .feature-content p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
 
     </style>
 </head>
@@ -222,11 +333,13 @@
     </nav>
 
     <div class="container">
-        <h1>What's next?</h1>
+        <div class="header-row">
+            <h1>What's next?</h1>
+            <button class="btn-clear" onclick="clearCompleted()">Clear Done 🧹</button>
+        </div>
         
         <div class="input-group">
             <input type="text" id="taskInput" placeholder="Add a new task..." onkeypress="handleEnter(event)">
-            <!-- 这里的选项会由 JS 自动填充 -->
             <select id="projectSelect"></select>
             <button class="btn-add" onclick="addTask()">＋</button>
         </div>
@@ -234,15 +347,63 @@
         <ul class="task-list" id="taskList">
             <!-- Tasks will be injected here -->
         </ul>
+
+        <!-- Features / Help Section -->
+        <div class="features-section">
+            <h2 class="features-title">How it works</h2>
+            
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-content">
+                        <h3>Seamless Focus</h3>
+                        <p>Click the <strong>Play (▶)</strong> button to carry your task directly into the timer.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon">🖱️</div>
+                    <div class="feature-content">
+                        <h3>Drag & Sort</h3>
+                        <p>Priorities change. Drag any task to reorder your list instantly.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon">⚡️</div>
+                    <div class="feature-content">
+                        <h3>Quick Actions</h3>
+                        <p><strong>Double-click</strong> text to edit. Use "Clear Done" to sweep away finished tasks.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <div class="feature-content">
+                        <h3>Smart Tags</h3>
+                        <p>Tags automatically sync colors with your project settings.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SEO Footer Text (Hidden visually but good for structure) -->
+            <p style="text-align: center; margin-top: 30px; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.5;">
+                FlowState Task Manager — Designed for Deep Work & Productivity.
+            </p>
+        </div>
+
     </div>
 
     <script>
-        // --- 1. 读取主页的数据库 (获取项目列表) ---
+        // --- 1. 读取主页的数据库 ---
         let db = { projects: [] };
         try {
             const raw = localStorage.getItem('flowStateDB');
             if (raw) db = JSON.parse(raw);
-            // 如果完全没有项目，给一个默认的
             if (!db.projects || db.projects.length === 0) {
                 db.projects = [{id: 'default', name: 'General', color: '#94a3b8'}];
             }
@@ -268,7 +429,7 @@
         function addTask() {
             const input = document.getElementById('taskInput');
             const text = input.value.trim();
-            const projectId = projectSelect.value; // 获取当前选中的项目ID
+            const projectId = projectSelect.value;
             
             if (!text) return;
 
@@ -299,54 +460,104 @@
             saveTasks();
         }
 
-        // --- 4. 核心跳转逻辑 ---
+        function clearCompleted() {
+            if(confirm('Remove all completed tasks?')) {
+                tasks = tasks.filter(t => !t.done);
+                saveTasks();
+            }
+        }
+
+        // --- 4. 双击编辑逻辑 ---
+        function enableEdit(id, element) {
+            const task = tasks.find(t => t.id === id);
+            if (!task || task.done) return; 
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = task.text;
+            input.className = 'edit-input';
+            
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+
+            const save = () => {
+                const newText = input.value.trim();
+                if (newText) {
+                    task.text = newText;
+                    saveTasks(); 
+                } else {
+                    renderTasks(); // 撤销更改
+                }
+            };
+
+            input.addEventListener('blur', save);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') save();
+            });
+        }
+
+        // --- 5. 核心跳转逻辑 ---
         function startFocus(text, projectId) {
-            // mode=stopwatch: 强制使用正向计时
-            // projectId=...: 强制切换到对应项目
-            // autoStart=true: 自动开始
             const url = `index.html?task=${encodeURIComponent(text)}&projectId=${projectId}&mode=stopwatch&autoStart=true`;
             window.location.href = url;
         }
 
-        // 辅助函数：根据ID找项目颜色和名称
         function getProjectInfo(pid) {
             const p = db.projects.find(i => i.id === pid);
             return p ? p : { name: 'General', color: '#94a3b8' };
+        }
+
+        function updateOrderFromDOM() {
+            const list = document.getElementById('taskList');
+            const newOrderIds = Array.from(list.children).map(li => Number(li.dataset.id));
+            tasks.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
+            localStorage.setItem('flowTasks', JSON.stringify(tasks));
         }
 
         function renderTasks() {
             const list = document.getElementById('taskList');
             list.innerHTML = '';
 
+            // 空状态
             if (tasks.length === 0) {
-                list.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:50px; opacity:0.5;">No tasks yet. Add one above!</div>`;
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">🏝️</span>
+                        <div class="empty-text">All caught up!</div>
+                        <div class="empty-sub">Time to relax or add a new challenge.</div>
+                    </div>`;
                 return;
             }
 
             tasks.forEach(task => {
                 const li = document.createElement('li');
                 li.className = `task-item ${task.done ? 'done' : ''}`;
+                li.dataset.id = task.id;
                 
-                // 获取项目信息用于显示标签
                 const project = getProjectInfo(task.projectId);
-                
-                // 动态生成标签样式（使用项目颜色的淡化版作为背景）
-                // 简单的处理：文字用项目色，背景用透明度
-                const tagStyle = `color: ${project.color}; border: 1px solid ${project.color}40; background: ${project.color}10;`;
+                const bgStyle = `${project.color}26`; 
+                const textStyle = project.color;
 
                 li.innerHTML = `
-                    <div class="task-left" onclick="toggleTask(${task.id})">
-                        <div class="checkbox">${task.done ? '✓' : ''}</div>
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <span class="task-text" style="font-weight:500;">${task.text}</span>
-                            <span class="project-tag" style="${tagStyle}">${project.name}</span>
+                    <div class="task-left">
+                        <div class="checkbox" onclick="toggleTask(${task.id})">${task.done ? '✔' : ''}</div>
+                        <div style="flex:1; padding-right: 10px;">
+                            <div class="task-text" 
+                                 ondblclick="enableEdit(${task.id}, this)" 
+                                 title="Double click to edit"
+                                 style="font-weight:500; margin-bottom:4px; cursor:text;">
+                                 ${task.text}
+                            </div>
+                            <span class="project-tag" style="background-color: ${bgStyle}; color: ${textStyle}; border: 1px solid ${project.color}40;">
+                                ${project.name}
+                            </span>
                         </div>
                     </div>
                     <div class="actions">
-                        ${!task.done ? `
-                        <button class="btn-icon btn-play" onclick="startFocus('${task.text}', '${task.projectId}')" title="Start Tracking">
+                        <button class="btn-icon btn-play" onclick="startFocus('${task.text}', '${task.projectId}')" title="Start Focus">
                             ▶
-                        </button>` : ''}
+                        </button>
                         <button class="btn-icon btn-del" onclick="deleteTask(${task.id})" title="Delete">
                             ✕
                         </button>
@@ -356,8 +567,21 @@
             });
         }
 
-        // Init
-        renderTasks();
+        // --- 6. 初始化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTasks();
+
+            const list = document.getElementById('taskList');
+            new Sortable(list, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                delay: 100, 
+                delayOnTouchOnly: true,
+                onEnd: function (evt) {
+                    updateOrderFromDOM();
+                }
+            });
+        });
     </script>
 </body>
 </html>
