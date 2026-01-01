@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowState | Focus Timer & Nature Sounds</title>
+	<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2928/2928750.png">
+
     
     <!-- External Resources -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -503,17 +507,24 @@ class TimeMaster {
         };
     }
     
-    init() {
+        init() {
         this.cacheDOM();
+        
+        // ✅ 1. 新增：请求通知权限
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
         this.bindEvents();
         this.renderProjectSelect();
         
-        // 🚀 NEW: Check for URL parameters from tasks.html
+        // Check for URL parameters from tasks.html
         this.checkURLParams();
         
         this.updateUI();
         setTimeout(() => this.initCharts(), 100);
     }
+
     
     cacheDOM() {
         this.dom = {
@@ -705,7 +716,7 @@ class TimeMaster {
         }, 1000);
     }
     
-    stop(auto = false) {
+        stop(auto = false) {
         clearInterval(this.state.timerId);
         this.state.isRunning = false;
         this.dom.startBtn.disabled = false;
@@ -715,13 +726,12 @@ class TimeMaster {
         const duration = auto ? this.state.duration : passed;
         
         if (duration > 2) {
-            // 🚀 UPDATED: Save taskName to DB
             this.db.logs.unshift({ 
                 id: Date.now(), 
                 projectId: this.state.selectedProjectId, 
                 duration, 
                 date: new Date().toISOString(),
-                taskName: this.state.currentTaskName || null // 👈 保存任务名
+                taskName: this.state.currentTaskName || null 
             });
             
             this.saveDB();
@@ -731,10 +741,19 @@ class TimeMaster {
             if (auto) {
                 this.dom.display.classList.add('timer-finished');
                 document.title = "🚨 TIME IS UP!";
+                
+                // ✅ 2. 新增：发送通知
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("🎉 Time is up!", {
+                        body: "Great job! Take a break.",
+                        icon: "https://cdn-icons-png.flaticon.com/512/2928/2928750.png"
+                    });
+                }
             }
         }
         if (!auto) this.reset();
     }
+
     
     reset() {
         if (this.state.isRunning) clearInterval(this.state.timerId);
@@ -1007,5 +1026,16 @@ setTimeout(() => {
     if(typeof AdvancedStats !== 'undefined') AdvancedStats.init();
 }, 500);
 </script>
+<script>
+    // 注册 PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker 注册成功:', reg.scope))
+                .catch(err => console.log('Service Worker 注册失败:', err));
+        });
+    }
+</script>
+
 </body>
 </html>
