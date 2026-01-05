@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
 	<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9X5EY2TKFD"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-9X5EY2TKFD"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+	  gtag('config', 'G-9X5EY2TKFD');
+	</script>
 
-  gtag('config', 'G-9X5EY2TKFD');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowState | Focus Timer & Nature Sounds</title>
-	<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2928/2928750.png">
 
-    
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#0f172a">
+	<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2928/2928750.png">
+
     <!-- External Resources -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg-color: #0f172a;
@@ -73,7 +73,7 @@
             background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15), transparent 50%);
             display: flex; justify-content: center;
         }
-        
+
         .app-container {
             width: 100%; max-width: 1200px;
             display: grid; grid-template-columns: 350px 1fr; gap: 20px;
@@ -85,16 +85,16 @@
             display: flex; flex-direction: column;
         }
         h2 { font-size: 1.1rem; margin-bottom: 15px; color: var(--text-secondary); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        
+
         /* Timer Styles */
-        .timer-display { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 4rem; 
-            font-weight: 700; 
-            text-align: center; 
-            margin: 10px 0; 
-            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); 
-            font-variant-numeric: tabular-nums; 
+        .timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 10px 0;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            font-variant-numeric: tabular-nums;
             transition: color 0.3s, text-shadow 0.3s;
         }
 
@@ -113,12 +113,12 @@
         .mode-btn { flex: 1; background: transparent; border: none; color: var(--text-secondary); padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.3s; }
         .mode-btn.active { background: var(--accent-blue); color: white; }
         .mode-btn:hover:not(.active) { color: white; background: rgba(255,255,255,0.05); }
-        
+
         .project-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .project-select { flex: 1; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; border-radius: 8px; outline: none; }
         .icon-btn { width: 42px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 8px; cursor: pointer; font-size: 1.2rem; }
         .icon-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-        
+
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #fff; transition: opacity 0.2s; }
         .btn:hover { opacity: 0.9; }
@@ -159,16 +159,16 @@
             accent-color: var(--accent-blue);
             cursor: pointer;
         }
-        
+
         /* Logs & Charts */
         .log-list { flex: 1; overflow-y: auto; margin-top: 10px; padding-right: 5px; max-height: 250px; }
         .log-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: var(--text-secondary); }
         .delete-btn { color: var(--accent-red); cursor: pointer; border: none; background: none; padding: 0 5px; }
-        
+
         .dashboard-grid { display: grid; grid-template-rows: auto 1fr; gap: 20px; }
         .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .chart-container { position: relative; height: 250px; width: 100%; }
-        
+
         /* --- Advanced Stats Styles --- */
         .adv-stats-section {
             width: 100%;
@@ -185,27 +185,24 @@
         }
         .adv-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr; /* Pie takes 1, Bar takes 2 */
+            grid-template-columns: 1fr 2fr;
             gap: 20px;
         }
-        
+
         /* Date Navigator Styles */
         .date-navigator-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); height: 38px; }
         .nav-arrow { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 0 10px; font-size: 0.8rem; height: 100%; border-radius: 4px; }
         .nav-arrow:hover { background: rgba(255,255,255,0.1); color: white; }
-        
+
         .date-picker-container { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; min-width: 140px; cursor: pointer; border-radius: 4px; }
         .date-picker-container:hover { background: rgba(255,255,255,0.05); }
-        
+
         .date-label-group { display: flex; align-items: center; gap: 6px; color: var(--text-primary); font-size: 0.9rem; font-weight: 500; pointer-events: none; }
-        
+
         /* Invisible Date Input */
         #adv-date-picker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
 
-        .scroll-container {
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
+        .scroll-container { overflow-x: auto; padding-bottom: 5px; }
         .scroll-container::-webkit-scrollbar { height: 4px; }
         .scroll-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 
@@ -255,72 +252,73 @@
             <a href="breathe.html">Breathe</a>
             <a href="custom.html">Timer</a>
             <a href="days.html">Days</a>
-
+            <a href="life.html">Life</a>
         </div>
     </div>
 </nav>
 
 <div class="main-wrapper">
-    
+
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="app-container">
             <!-- Left Control Panel -->
             <div class="card control-panel">
                 <div class="mode-switch">
-                    <button class="mode-btn active" id="btn-pomodoro" onclick="app.setMode('pomodoro')">🍅 Pomodoro</button>
-                    <button class="mode-btn" id="btn-stopwatch" onclick="app.setMode('stopwatch')">🌊 Flow</button>
+                    <button class="mode-btn active" id="btn-pomodoro" data-action="set-mode" data-mode="pomodoro">🍅 Pomodoro</button>
+                    <button class="mode-btn" id="btn-stopwatch" data-action="set-mode" data-mode="stopwatch">🌊 Flow</button>
                 </div>
+
                 <div class="project-row">
                     <select id="projectSelect" class="project-select"></select>
-                    <button class="icon-btn" onclick="app.ui.toggleModal(true)" title="Manage Projects">⚙️</button>
+                    <button class="icon-btn" data-action="open-project-modal" title="Manage Projects">⚙️</button>
                 </div>
-                
+
                 <!-- Task Display -->
                 <div id="current-task-display" style="
-                    color: var(--accent-green); 
-                    font-size: 1.1rem; 
+                    color: var(--accent-green);
+                    font-size: 1.1rem;
                     margin-top: 5px;
-                    min-height: 1.5rem; 
+                    min-height: 1.5rem;
                     opacity: 0.9;
                     text-transform: uppercase;
                     letter-spacing: 1px;
                     text-align: center;
                     font-weight: 600;
                 "></div>
-                
+
                 <!-- Timer -->
                 <div class="timer-display" id="timerDisplay">25:00</div>
 
                 <!-- Sound Bar -->
                 <div class="sound-bar">
                     <div class="sound-icons">
-                        <button class="sound-btn" onclick="app.audio.toggle('rain')" title="Light Rain">🌧️</button>
-                        <button class="sound-btn" onclick="app.audio.toggle('forest')" title="Forest Birds">🐦</button>
-                        <button class="sound-btn" onclick="app.audio.toggle('waves')" title="Ocean Waves">🌊</button>
-                        <button class="sound-btn" onclick="app.audio.toggle('fire')" title="Campfire">🔥</button>
+                        <button class="sound-btn" data-action="toggle-sound" data-sound="rain" title="Light Rain">🌧️</button>
+                        <button class="sound-btn" data-action="toggle-sound" data-sound="forest" title="Forest Birds">🐦</button>
+                        <button class="sound-btn" data-action="toggle-sound" data-sound="waves" title="Ocean Waves">🌊</button>
+                        <button class="sound-btn" data-action="toggle-sound" data-sound="fire" title="Campfire">🔥</button>
                     </div>
                     <div style="display:flex; align-items:center; gap:5px;">
                         <span style="font-size:0.8rem;">🔊</span>
-                        <input type="range" min="0" max="1" step="0.1" value="0.5" class="volume-slider" oninput="app.audio.setVolume(this.value)">
+                        <input type="range" min="0" max="1" step="0.1" value="0.5" class="volume-slider" id="volumeSlider">
                     </div>
                 </div>
-                
+
                 <div class="btn-group">
-                    <button class="btn btn-start" id="startBtn" onclick="app.start()">Start</button>
-                    <button class="btn btn-stop" id="stopBtn" onclick="app.stop()" disabled>Finish</button>
-                    <button class="btn btn-reset" onclick="app.reset()">Reset</button>
+                    <button class="btn btn-start" id="startBtn" data-action="start">Start</button>
+                    <button class="btn btn-stop" id="stopBtn" data-action="finish" disabled>Finish</button>
+                    <button class="btn btn-reset" id="resetBtn" data-action="reset">Reset</button>
                 </div>
-                
+
                 <!-- Recent Logs -->
                 <div style="flex: 1; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h2 style="margin:0; font-size:1.1rem;">Recent Logs</h2>
                         <div style="display:flex; gap:8px;">
-                            <button onclick="app.data.exportData()" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">⬇️ Backup</button>
+                            <button id="backupBtn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">⬇️ Backup</button>
                             <label style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">
                                 ⬆️ Restore
-                                <input type="file" style="display:none" onchange="app.data.importData(this)">
+                                <input type="file" id="restoreInput" style="display:none">
                             </label>
                         </div>
                     </div>
@@ -343,8 +341,14 @@
                 <div class="card">
                     <h2>📅 Today's Overview</h2>
                     <div style="display: flex; gap: 40px;">
-                        <div><div style="font-size: 0.9rem; color: var(--text-secondary);">Total Focus</div><div style="font-size: 2rem; font-weight: bold;" id="todayTotal">0h 0m 0s</div></div>
-                        <div><div style="font-size: 0.9rem; color: var(--text-secondary);">Sessions</div><div style="font-size: 2rem; font-weight: bold;" id="todayCount">0</div></div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Total Focus</div>
+                            <div style="font-size: 2rem; font-weight: bold;" id="todayTotal">0h 0m 0s</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Sessions</div>
+                            <div style="font-size: 2rem; font-weight: bold;" id="todayCount">0</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -359,7 +363,7 @@
             <!-- Controls -->
             <div class="adv-controls">
                 <h2 style="margin:0; font-size:1.2rem; color:white;">🔎 Detailed Analysis</h2>
-                
+
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <!-- Dimension Switch -->
                     <div class="mode-switch" style="margin:0;">
@@ -371,19 +375,18 @@
 
                     <!-- Date Navigator -->
                     <div class="date-navigator-wrapper">
-                        <button onclick="AdvancedStats.move(-1)" class="nav-arrow" title="Previous">◀</button>
-                        
-                        <!-- CLICKABLE AREA -->
-                        <div class="date-picker-container" onclick="try{document.getElementById('adv-date-picker').showPicker()}catch(e){document.getElementById('adv-date-picker').focus()}">
+                        <button class="nav-arrow" data-action="adv-move" data-step="-1" title="Previous">◀</button>
+
+                        <div class="date-picker-container" id="adv-date-container">
                             <div class="date-label-group">
                                 <span id="adv-date-label">Today</span>
                                 <span style="font-size: 0.8rem; opacity: 0.6;">📅</span>
                             </div>
-                            <input type="date" id="adv-date-picker" onchange="AdvancedStats.pickDate(this.value)" title="Jump to date">
+                            <input type="date" id="adv-date-picker" title="Jump to date">
                         </div>
 
-                        <button onclick="AdvancedStats.move(1)" class="nav-arrow" title="Next">▶</button>
-                        <button onclick="AdvancedStats.resetDate()" class="nav-arrow" style="color:var(--accent-blue);" title="Back to Today">↺</button>
+                        <button class="nav-arrow" data-action="adv-move" data-step="1" title="Next">▶</button>
+                        <button class="nav-arrow" data-action="adv-reset" style="color:var(--accent-blue);" title="Back to Today">↺</button>
                     </div>
                 </div>
             </div>
@@ -461,8 +464,8 @@
 <footer>
     <p>&copy; 2024 FlowState App. The best tool for Time Blocking & Deep Work.</p>
     <div style="margin-top: 10px; opacity: 0.6; font-size: 0.8rem;">
-        <a href="#" style="color: inherit; margin: 0 10px;">Privacy Policy</a> | 
-        <a href="#" style="color: inherit; margin: 0 10px;">Terms of Service</a> | 
+        <a href="#" style="color: inherit; margin: 0 10px;">Privacy Policy</a> |
+        <a href="#" style="color: inherit; margin: 0 10px;">Terms of Service</a> |
         <a href="#" style="color: inherit; margin: 0 10px;">Contact</a>
     </div>
 </footer>
@@ -472,12 +475,12 @@
     <div class="modal-content">
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
             <h3>Manage Projects</h3>
-            <button onclick="app.ui.toggleModal(false)" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">×</button>
+            <button id="closeProjectModalBtn" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">×</button>
         </div>
         <div class="add-form">
             <input type="text" id="newProjectName" class="input-text" placeholder="Project name...">
             <input type="color" id="newProjectColor" class="input-color" value="#3b82f6">
-            <button class="btn btn-start" style="flex: 0 0 60px;" onclick="app.data.addProject()">Add</button>
+            <button class="btn btn-start" style="flex: 0 0 60px;" id="addProjectBtn">Add</button>
         </div>
         <div id="projectList" style="max-height: 300px; overflow-y: auto;"></div>
     </div>
@@ -490,23 +493,55 @@
 <audio id="bg-fire" loop src="https://assets.mixkit.co/active_storage/sfx/2405/2405-preview.mp3"></audio>
 
 <script>
-// ==========================================
-// 1. CORE TIMER LOGIC (TimeMaster)
-// ==========================================
+/* =========================================================
+   Security + Date helpers
+   ========================================================= */
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function localDateKey(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function round1(n) {
+  return Math.round(n * 10) / 10;
+}
+
+/* =========================================================
+   1) CORE TIMER LOGIC (TimeMaster)
+   ========================================================= */
 class TimeMaster {
     constructor() {
-        // 🚀 UPDATED: Added currentTaskName to state
-        this.state = { mode: 'pomodoro', isRunning: false, startTime: null, duration: 25 * 60, timerId: null, selectedProjectId: null, currentTaskName: null };
+        this.state = {
+          mode: 'pomodoro',
+          isRunning: false,
+          startTime: null,
+          duration: 25 * 60,
+          timerId: null,
+          selectedProjectId: null,
+          currentTaskName: null,
+          notifAsked: false
+        };
+
         try {
             const raw = localStorage.getItem('flowStateDB');
             this.db = raw ? JSON.parse(raw) : this.getDefaultDB();
             if (!this.db.projects || !Array.isArray(this.db.projects)) this.db = this.getDefaultDB();
-        } catch (e) { this.db = this.getDefaultDB(); }
+        } catch (e) {
+            this.db = this.getDefaultDB();
+        }
+
         this.state.selectedProjectId = this.db.projects[0]?.id;
         this.charts = { pie: null, bar: null };
         this.init();
     }
-    
+
     getDefaultDB() {
         return {
             logs: [],
@@ -517,26 +552,33 @@ class TimeMaster {
             ]
         };
     }
-    
-        init() {
+
+    init() {
         this.cacheDOM();
-        
-        // ✅ 1. 新增：请求通知权限
-        if ("Notification" in window && Notification.permission !== "granted") {
-            Notification.requestPermission();
+
+        // one-time migration: old logs -> add dateKeyLocal for correct Today stats
+        let changed = false;
+        for (const l of (this.db.logs || [])) {
+          if (!l.dateKeyLocal && l.date) {
+            const d = new Date(l.date);
+            if (!Number.isNaN(d.getTime())) {
+              l.dateKeyLocal = localDateKey(d);
+              changed = true;
+            }
+          }
         }
+        if (changed) this.saveDB();
 
         this.bindEvents();
         this.renderProjectSelect();
-        
+
         // Check for URL parameters from tasks.html
         this.checkURLParams();
-        
+
         this.updateUI();
         setTimeout(() => this.initCharts(), 100);
     }
 
-    
     cacheDOM() {
         this.dom = {
             display: document.getElementById('timerDisplay'),
@@ -552,11 +594,15 @@ class TimeMaster {
             newProjectColor: document.getElementById('newProjectColor')
         };
     }
-    
+
     bindEvents() {
         this.dom.projectSelect.addEventListener('change', (e) => this.state.selectedProjectId = e.target.value);
-        this.dom.modal.addEventListener('click', (e) => { if (e.target === this.dom.modal) this.ui.toggleModal(false); });
-        
+
+        // click outside modal to close
+        this.dom.modal.addEventListener('click', (e) => {
+            if (e.target === this.dom.modal) this.ui.toggleModal(false);
+        });
+
         // Prevent accidental tab closing when timer is running
         window.addEventListener('beforeunload', (e) => {
             if (this.state.isRunning) {
@@ -565,86 +611,185 @@ class TimeMaster {
                 return '';
             }
         });
+
+        // bind all UI actions (no inline handlers)
+        this.bindUIActions();
     }
-    
-    // 🚀 NEW FUNCTION: Handle URL parameters & Save Task Name
+
+    bindUIActions() {
+      // Global click delegation
+      document.addEventListener('click', (e) => {
+        const el = e.target.closest('[data-action]');
+        if (!el) return;
+
+        const action = el.dataset.action;
+
+        if (action === 'set-mode') {
+          const mode = el.dataset.mode;
+          if (mode) this.setMode(mode);
+          return;
+        }
+
+        if (action === 'open-project-modal') {
+          this.ui.toggleModal(true);
+          return;
+        }
+
+        if (action === 'toggle-sound') {
+          const sound = el.dataset.sound;
+          if (sound) this.audio.toggle(sound);
+          return;
+        }
+
+        if (action === 'start') { this.start(); return; }
+        if (action === 'finish') { this.stop(false); return; }
+        if (action === 'reset') { this.reset(); return; }
+
+        // Recent Logs delete (rendered)
+        if (action === 'delete-log') {
+          const id = Number(el.dataset.logId);
+          if (Number.isFinite(id)) this.data.deleteLog(id);
+          return;
+        }
+
+        // Project manager delete (rendered)
+        if (action === 'delete-project') {
+          const pid = el.dataset.projectId;
+          if (pid) this.data.deleteProject(pid);
+          return;
+        }
+
+        // Advanced stats
+        if (action === 'adv-move') {
+          const step = Number(el.dataset.step);
+          if (Number.isFinite(step)) AdvancedStats.move(step);
+          return;
+        }
+        if (action === 'adv-reset') {
+          AdvancedStats.resetDate();
+          return;
+        }
+      });
+
+      // Volume slider
+      const vol = document.getElementById('volumeSlider');
+      if (vol) vol.addEventListener('input', () => this.audio.setVolume(vol.value));
+
+      // Backup / Restore
+      const backupBtn = document.getElementById('backupBtn');
+      if (backupBtn) backupBtn.addEventListener('click', () => this.data.exportData());
+
+      const restoreInput = document.getElementById('restoreInput');
+      if (restoreInput) restoreInput.addEventListener('change', () => this.data.importData(restoreInput));
+
+      // Modal close / Add project
+      const closeBtn = document.getElementById('closeProjectModalBtn');
+      if (closeBtn) closeBtn.addEventListener('click', () => this.ui.toggleModal(false));
+
+      const addProjectBtn = document.getElementById('addProjectBtn');
+      if (addProjectBtn) addProjectBtn.addEventListener('click', () => this.data.addProject());
+
+      // Advanced stats date picker open + change
+      const advContainer = document.getElementById('adv-date-container');
+      const advPicker = document.getElementById('adv-date-picker');
+      if (advContainer && advPicker) {
+        advContainer.addEventListener('click', () => {
+          try { advPicker.showPicker(); } catch { advPicker.focus(); }
+        });
+        advPicker.addEventListener('change', () => AdvancedStats.pickDate(advPicker.value));
+      }
+    }
+
+    // Handle URL parameters & Save Task Name
     checkURLParams() {
-        const params = new URLSearchParams(window.location.search);
-        const task = params.get('task');
-        const pid = params.get('projectId');
-        const mode = params.get('mode');
-        const auto = params.get('autoStart');
+    const params = new URLSearchParams(window.location.search);
+    const task = params.get('task');
+    const pid = params.get('projectId');
+    const mode = params.get('mode');
+    const auto = params.get('autoStart');
+    const durationParam = params.get('duration'); // seconds ✅新增
 
-        // 1. Set Project
-        if (pid && this.getProject(pid)) {
-            this.state.selectedProjectId = pid;
-            this.dom.projectSelect.value = pid;
-        }
+    // 1. Set Project
+    if (pid && this.getProject(pid)) {
+        this.state.selectedProjectId = pid;
+        this.dom.projectSelect.value = pid;
+    }
 
-        // 2. Set Mode
-        if (mode === 'stopwatch' || mode === 'pomodoro') {
-            this.setMode(mode);
-        }
+    // 2. Set Mode
+    if (mode === 'stopwatch' || mode === 'pomodoro') {
+        this.setMode(mode);
+    }
 
-        // 3. Set Task Name Display & SAVE TO STATE
-        if (task) {
-            this.state.currentTaskName = task; // 👈 保存任务名到状态
-            const display = document.getElementById('current-task-display');
-            if (display) display.textContent = task;
-            document.title = `▶ ${task}`;
-        }
-
-        // 4. Auto Start
-        if (auto === 'true') {
-            this.start();
-        }
-        
-        // 5. Clean URL to prevent re-triggering on refresh
-        if (task || pid || mode) {
-            window.history.replaceState({}, document.title, window.location.pathname);
+    // 2.5 ✅ Apply Pomodoro duration override (must be AFTER setMode, BEFORE start)
+    if (mode === 'pomodoro' && durationParam) {
+        const sec = Number(durationParam);
+        if (Number.isFinite(sec) && sec >= 60 && sec <= 6 * 60 * 60) {
+            this.state.duration = Math.floor(sec);
+            this.reset(); // 让 UI & remainingTime 同步成新的倒计时
         }
     }
-    
-    // Audio Logic
+
+    // 3. Set Task Name Display & SAVE TO STATE
+    if (task) {
+        this.state.currentTaskName = task;
+        const display = document.getElementById('current-task-display');
+        if (display) display.textContent = task; // safe
+        document.title = `▶ ${task}`;
+    }
+
+    // 4. Auto Start
+    if (auto === 'true') {
+        this.start();
+    }
+
+    // 5. Clean URL
+    // ✅建议把 duration/auto 也算进去，不然 URL 可能残留 duration（可选）
+    if (task || pid || mode || durationParam || auto) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+
+    // Audio Logic (no more onclick selector dependency)
     audio = {
         current: null,
         volume: 0.5,
         toggle: (type) => {
             const id = `bg-${type}`;
             const el = document.getElementById(id);
-            const btn = document.querySelector(`button[onclick="app.audio.toggle('${type}')"]`);
-            
+            const btn = document.querySelector(`.sound-btn[data-sound="${type}"]`);
+
             if (this.audio.current === el && !el.paused) {
                 el.pause();
                 this.audio.current = null;
-                btn.classList.remove('active');
+                if (btn) btn.classList.remove('active');
             } else {
                 ['rain', 'forest', 'waves', 'fire'].forEach(t => {
                     const other = document.getElementById(`bg-${t}`);
-                    if(other) other.pause();
-                    const b = document.querySelector(`button[onclick="app.audio.toggle('${t}')"]`);
-                    if(b) b.classList.remove('active');
+                    if (other) other.pause();
+                    const b = document.querySelector(`.sound-btn[data-sound="${t}"]`);
+                    if (b) b.classList.remove('active');
                 });
-                
+
                 el.volume = this.audio.volume;
                 el.play();
                 this.audio.current = el;
-                btn.classList.add('active');
+                if (btn) btn.classList.add('active');
             }
         },
         setVolume: (val) => {
-            this.audio.volume = val;
-            if (this.audio.current) this.audio.current.volume = val;
+            this.audio.volume = Number(val);
+            if (this.audio.current) this.audio.current.volume = Number(val);
         }
     };
-    
+
     ui = {
         toggleModal: (show) => {
             if (show) { this.dom.modal.classList.add('open'); this.renderProjectManager(); }
             else { this.dom.modal.classList.remove('open'); }
         }
     };
-    
+
     data = {
         addProject: () => {
             const name = this.dom.newProjectName.value.trim();
@@ -677,8 +822,8 @@ class TimeMaster {
             a.download = `flowstate_backup.json`;
             a.click();
         },
-        importData: (input) => {
-            const file = input.files[0];
+        importData: (inputEl) => {
+            const file = inputEl.files[0];
             if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -691,24 +836,40 @@ class TimeMaster {
                     } else {
                         alert('Invalid file format.');
                     }
-                } catch(err) { alert('Error parsing file.'); }
+                } catch(err) {
+                    alert('Error parsing file.');
+                } finally {
+                    inputEl.value = '';
+                }
             };
             reader.readAsText(file);
         }
     };
-    
+
     saveDB() { localStorage.setItem('flowStateDB', JSON.stringify(this.db)); }
-    
+
     setMode(mode) {
         if (this.state.isRunning) return alert('Please stop the timer first.');
         this.state.mode = mode;
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(mode === 'stopwatch' ? 'btn-stopwatch' : 'btn-pomodoro').classList.add('active');
+
+        // only top mode buttons should be toggled here (not advanced stats)
+        document.getElementById('btn-pomodoro').classList.toggle('active', mode === 'pomodoro');
+        document.getElementById('btn-stopwatch').classList.toggle('active', mode === 'stopwatch');
+
         this.reset();
     }
-    
+
     start() {
         if (this.state.isRunning) return;
+
+        // Ask notification permission on user gesture (Start), not on load
+        if ("Notification" in window && !this.state.notifAsked) {
+            this.state.notifAsked = true;
+            if (Notification.permission === "default") {
+                Notification.requestPermission().catch(()=>{});
+            }
+        }
+
         this.state.isRunning = true;
         this.state.startTime = Date.now();
         this.dom.startBtn.disabled = true;
@@ -726,34 +887,36 @@ class TimeMaster {
             }
         }, 1000);
     }
-    
-        stop(auto = false) {
+
+    stop(auto = false) {
         clearInterval(this.state.timerId);
         this.state.isRunning = false;
         this.dom.startBtn.disabled = false;
         this.dom.stopBtn.disabled = true;
         this.dom.startBtn.style.opacity = '1';
+
         const passed = Math.floor((Date.now() - this.state.startTime) / 1000);
         const duration = auto ? this.state.duration : passed;
-        
+
         if (duration > 2) {
-            this.db.logs.unshift({ 
-                id: Date.now(), 
-                projectId: this.state.selectedProjectId, 
-                duration, 
-                date: new Date().toISOString(),
-                taskName: this.state.currentTaskName || null 
+            const now = new Date();
+            this.db.logs.unshift({
+                id: Date.now(),
+                projectId: this.state.selectedProjectId,
+                duration,
+                date: now.toISOString(),
+                dateKeyLocal: localDateKey(now),
+                taskName: this.state.currentTaskName || null
             });
-            
+
             this.saveDB();
             this.updateUI();
             if(typeof AdvancedStats !== 'undefined') AdvancedStats.refresh();
-            
+
             if (auto) {
                 this.dom.display.classList.add('timer-finished');
                 document.title = "🚨 TIME IS UP!";
-                
-                // ✅ 2. 新增：发送通知
+
                 if ("Notification" in window && Notification.permission === "granted") {
                     new Notification("🎉 Time is up!", {
                         body: "Great job! Take a break.",
@@ -762,135 +925,174 @@ class TimeMaster {
                 }
             }
         }
+
         if (!auto) this.reset();
     }
 
-    
     reset() {
         if (this.state.isRunning) clearInterval(this.state.timerId);
         this.state.isRunning = false;
         this.dom.startBtn.disabled = false;
         this.dom.stopBtn.disabled = true;
+        this.dom.startBtn.style.opacity = '1';
         this.dom.display.classList.remove('timer-finished');
         this.updateDisplay(this.state.mode === 'pomodoro' ? this.state.duration : 0);
     }
-    
+
     updateDisplay(s) {
         const m = Math.floor(s / 60).toString().padStart(2, '0');
         const sec = (s % 60).toString().padStart(2, '0');
         this.dom.display.textContent = `${m}:${sec}`;
         if (!this.dom.display.classList.contains('timer-finished')) document.title = `${m}:${sec} - FlowState`;
     }
-    
-    getProject(id) { return this.db.projects.find(p => p.id === id) || { name: 'Unknown', color: '#64748b' }; }
-    
+
+    getProject(id) {
+        return this.db.projects.find(p => p.id === id) || { name: 'Unknown', color: '#64748b' };
+    }
+
     renderProjectSelect() {
-        this.dom.projectSelect.innerHTML = this.db.projects.map(p => 
-            `<option value="${p.id}" ${p.id === this.state.selectedProjectId ? 'selected' : ''}>${p.name}</option>`
+        this.dom.projectSelect.innerHTML = this.db.projects.map(p =>
+            `<option value="${p.id}" ${p.id === this.state.selectedProjectId ? 'selected' : ''}>${escapeHTML(p.name)}</option>`
         ).join('');
         this.state.selectedProjectId = this.dom.projectSelect.value;
     }
-    
+
     renderProjectManager() {
         this.dom.projectList.innerHTML = this.db.projects.map(p => `
             <div class="project-list-item">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div style="width:12px; height:12px; border-radius:50%; background:${p.color}"></div>
-                    <span>${p.name}</span>
+                    <span>${escapeHTML(p.name)}</span>
                 </div>
-                <button onclick="app.data.deleteProject('${p.id}')" class="delete-btn">Delete</button>
+                <button class="delete-btn" data-action="delete-project" data-project-id="${p.id}">Delete</button>
             </div>
         `).join('');
     }
-    
+
     updateUI() {
         this.dom.recentLogs.innerHTML = this.db.logs.slice(0, 10).map(log => {
             const p = this.getProject(log.projectId);
             const d = new Date(log.date);
-            
-            // 🚀 UPDATED: Display Task Name if exists
-            const taskLabel = log.taskName ? ` <span style="opacity:0.7; font-size:0.85em;">— ${log.taskName}</span>` : '';
-            
+
+            const safeProjectName = escapeHTML(p.name);
+            const safeTask = log.taskName ? escapeHTML(log.taskName) : '';
+            const taskLabel = safeTask ? ` <span style="opacity:0.7; font-size:0.85em;">— ${safeTask}</span>` : '';
+
             return `
                 <div class="log-item">
                     <div>
-                        <span style="color:${p.color}">●</span> 
-                        ${p.name}${taskLabel}
+                        <span style="color:${p.color}">●</span>
+                        ${safeProjectName}${taskLabel}
                         <span style="font-size:0.8rem; opacity:0.5; margin-left:5px;">
-    ${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}
-</span>
-
+                            ${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}
+                        </span>
                     </div>
-                    <div>${Math.floor(log.duration / 60)}m <button class="delete-btn" onclick="app.data.deleteLog(${log.id})">✖</button></div>
+                    <div>
+                      ${Math.floor(log.duration / 60)}m
+                      <button class="delete-btn" data-action="delete-log" data-log-id="${log.id}">✖</button>
+                    </div>
                 </div>`;
         }).join('') || '<div style="text-align:center; padding:20px; opacity:0.5">No logs yet</div>';
-        
-        const today = new Date().toISOString().split('T')[0];
-        const logs = this.db.logs.filter(l => l.date.startsWith(today));
+
+        const todayKey = localDateKey(new Date());
+        const logs = this.db.logs.filter(l => (l.dateKeyLocal || '') === todayKey);
         const total = logs.reduce((a, b) => a + b.duration, 0);
         this.dom.todayTotal.textContent = `${Math.floor(total / 3600)}h ${Math.floor((total % 3600) / 60)}m`;
         this.dom.todayCount.textContent = logs.length;
+
         if (this.charts.pie) this.updateCharts();
     }
-    
+
     initCharts() {
         if (typeof Chart === 'undefined') return;
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
         this.charts.pie = new Chart(document.getElementById('pieChart'), {
-            type: 'doughnut', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', display: false } } }
+            type: 'doughnut',
+            data: { labels: [], datasets: [] },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { position: 'right', display: false } }
+            }
         });
+
         this.charts.bar = new Chart(document.getElementById('barChart'), {
-            type: 'bar', data: { labels: [], datasets: [] },
+            type: 'bar',
+            data: { labels: [], datasets: [] },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
         });
+
         this.updateCharts();
     }
-    
+
     updateCharts() {
         if (!this.charts.pie) return;
+
         const pieStats = {};
-        this.db.logs.forEach(l => { if (!pieStats[l.projectId]) pieStats[l.projectId] = 0; pieStats[l.projectId] += l.duration; });
+        this.db.logs.forEach(l => {
+            if (!pieStats[l.projectId]) pieStats[l.projectId] = 0;
+            pieStats[l.projectId] += l.duration;
+        });
+
         const pLabels = [], pData = [], pColors = [];
         Object.keys(pieStats).forEach(pid => {
             const p = this.getProject(pid);
-            pLabels.push(p.name); pData.push((pieStats[pid]/60).toFixed(1)); pColors.push(p.color);
+            pLabels.push(p.name);
+            pData.push(round1(pieStats[pid] / 60)); // number
+            pColors.push(p.color);
         });
-        this.charts.pie.data = { labels: pLabels, datasets: [{ data: pData, backgroundColor: pColors, borderWidth: 0 }] };
+
+        this.charts.pie.data = {
+          labels: pLabels,
+          datasets: [{ data: pData, backgroundColor: pColors, borderWidth: 0 }]
+        };
         this.charts.pie.update();
-        
+
+        // (保持你原本逻辑：7-day 用 UTC key；如要完全本地也可再改)
         const bLabels = [], bData = {};
-        for(let i=6; i>=0; i--) {
-            const d = new Date(); d.setDate(d.getDate()-i);
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
             const k = d.toISOString().split('T')[0];
             bLabels.push(`${d.getMonth()+1}/${d.getDate()}`);
             bData[k] = 0;
         }
-        this.db.logs.forEach(l => { const k = l.date.split('T')[0]; if(bData.hasOwnProperty(k)) bData[k] += l.duration; });
-        this.charts.bar.data = { labels: bLabels, datasets: [{ label: 'Min', data: Object.values(bData).map(v=>(v/60).toFixed(1)), backgroundColor: '#3b82f6', borderRadius: 4 }] };
+        this.db.logs.forEach(l => {
+            const k = l.date.split('T')[0];
+            if (Object.prototype.hasOwnProperty.call(bData, k)) bData[k] += l.duration;
+        });
+
+        this.charts.bar.data = {
+          labels: bLabels,
+          datasets: [{
+            label: 'Min',
+            data: Object.values(bData).map(v => round1(v / 60)), // number
+            backgroundColor: '#3b82f6',
+            borderRadius: 4
+          }]
+        };
         this.charts.bar.update();
     }
 }
 
 const app = new TimeMaster();
 
-// ==========================================
-// 2. ADVANCED STATISTICS LOGIC (PERFECTED)
-// ==========================================
+/* =========================================================
+   2) ADVANCED STATISTICS LOGIC
+   ========================================================= */
 const AdvancedStats = {
     charts: { pie: null, bar: null },
     currentMode: 'day',
     cursorDate: new Date(),
 
-    init: function() {
-        ['day', 'week', 'month', 'year'].forEach(mode => {
-            const btn = document.getElementById(`adv-btn-${mode}`);
-            if(btn) btn.onclick = () => this.switchMode(mode);
-        });
-        this.switchMode('day');
-        console.log("Advanced Stats Initialized");
-    },
+   init: function() {
+    // Mode buttons are bound once via addEventListener below (bindAdvancedButtons)
+    this.switchMode('day');
+    console.log("Advanced Stats Initialized");
+},
+
 
     pickDate: function(dateStr) {
         if (!dateStr) return;
@@ -900,15 +1102,53 @@ const AdvancedStats = {
     },
 
     move: function(direction) {
-        const d = new Date(this.cursorDate);
-        if (this.currentMode === 'day') d.setDate(d.getDate() + direction);
-        else if (this.currentMode === 'week') d.setDate(d.getDate() + (direction * 7));
-        else if (this.currentMode === 'month') d.setMonth(d.getMonth() + direction);
-        else if (this.currentMode === 'year') d.setFullYear(d.getFullYear() + direction);
-        this.cursorDate = d;
-        this.refresh();
-    },
+    // direction: -1 (prev) or +1 (next)
+    const base = new Date(this.cursorDate);
 
+    if (this.currentMode === 'day') {
+        base.setDate(base.getDate() + direction);
+        this.cursorDate = base;
+        this.refresh();
+        return;
+    }
+
+    if (this.currentMode === 'week') {
+        base.setDate(base.getDate() + (direction * 7));
+        this.cursorDate = base;
+        this.refresh();
+        return;
+    }
+
+    if (this.currentMode === 'month') {
+        // Avoid issues like Jan 31 -> Feb (overflow)
+        const y = base.getFullYear();
+        const m = base.getMonth();
+        const d = base.getDate();
+
+        const targetMonth = m + direction;
+        const daysInTargetMonth = new Date(y, targetMonth + 1, 0).getDate();
+        const safeDay = Math.min(d, daysInTargetMonth);
+
+        this.cursorDate = new Date(y, targetMonth, safeDay);
+        this.refresh();
+        return;
+    }
+
+    // year
+    {
+        const y = base.getFullYear();
+        const m = base.getMonth();
+        const d = base.getDate();
+
+        const targetYear = y + direction;
+        const daysInTargetMonth = new Date(targetYear, m + 1, 0).getDate();
+        const safeDay = Math.min(d, daysInTargetMonth);
+
+        this.cursorDate = new Date(targetYear, m, safeDay);
+        this.refresh();
+        return;
+    }
+},
     resetDate: function() {
         this.cursorDate = new Date();
         this.refresh();
@@ -916,139 +1156,248 @@ const AdvancedStats = {
 
     switchMode: function(mode) {
         this.currentMode = mode;
-        document.querySelectorAll('.adv-controls .mode-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`adv-btn-${mode}`).classList.add('active');
+
+        // Toggle active buttons
+        ['day', 'week', 'month', 'year'].forEach(m => {
+            const btn = document.getElementById(`adv-btn-${m}`);
+            if (btn) btn.classList.toggle('active', m === mode);
+        });
+
+        // Snap cursorDate to start for week/month/year if you want (optional).
+        // Here we keep cursorDate as-is to avoid surprising jumps.
         this.refresh();
     },
 
-    refresh: function() {
-        const range = this.getDateRange(this.currentMode, this.cursorDate);
-        document.getElementById('adv-date-label').innerText = range.label;
-        
-        // Sync invisible picker
-        const y = this.cursorDate.getFullYear();
-        const m = String(this.cursorDate.getMonth() + 1).padStart(2, '0');
-        const d = String(this.cursorDate.getDate()).padStart(2, '0');
-        const picker = document.getElementById('adv-date-picker');
-        if(picker) picker.value = `${y}-${m}-${d}`;
+    // Build a range [start, end) in local time based on currentMode + cursorDate
+    getRange: function() {
+        const d = new Date(this.cursorDate);
 
-        const logs = app.db.logs;
-        const filteredLogs = logs.filter(l => {
-            const logDate = new Date(l.date);
-            return logDate >= range.start && logDate <= range.end;
-        });
+        let start, end;
 
-        this.renderCharts(filteredLogs, this.currentMode, range);
-    },
-
-    getDateRange: function(mode, date) {
-        const start = new Date(date);
-        let end = new Date(date);
-        let label = "";
-        const now = new Date();
-
-        if (mode === 'day') {
-            start.setHours(0,0,0,0);
-            end = new Date(start); end.setHours(23,59,59,999);
-            const isToday = now.toDateString() === start.toDateString();
-            const isYesterday = new Date(new Date().setDate(now.getDate()-1)).toDateString() === start.toDateString();
-            label = isToday ? "Today" : (isYesterday ? "Yesterday" : start.toLocaleDateString());
-        } 
-        else if (mode === 'week') {
-            const day = start.getDay();
-            const diff = start.getDate() - day + (day === 0 ? -6 : 1); 
-            start.setDate(diff); start.setHours(0,0,0,0);
-            end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
-            label = `${start.getMonth()+1}/${start.getDate()} - ${end.getMonth()+1}/${end.getDate()}`;
-        } 
-        else if (mode === 'month') {
-            start.setDate(1); start.setHours(0,0,0,0);
-            end = new Date(start); end.setMonth(start.getMonth() + 1); end.setDate(0); end.setHours(23,59,59,999);
-            label = start.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
-        } 
-        else if (mode === 'year') {
-            start.setMonth(0, 1); start.setHours(0,0,0,0);
-            end = new Date(start); end.setMonth(11, 31); end.setHours(23,59,59,999);
-            label = start.getFullYear().toString();
+        if (this.currentMode === 'day') {
+            start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        } else if (this.currentMode === 'week') {
+            // Week starts on Monday (you can change to Sunday if you prefer)
+            const day = d.getDay(); // 0 Sun ... 6 Sat
+            const diffToMon = (day === 0 ? -6 : 1 - day);
+            start = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diffToMon);
+            end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+        } else if (this.currentMode === 'month') {
+            start = new Date(d.getFullYear(), d.getMonth(), 1);
+            end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+        } else { // year
+            start = new Date(d.getFullYear(), 0, 1);
+            end = new Date(d.getFullYear() + 1, 0, 1);
         }
-        return { start, end, label };
+
+        return { start, end };
     },
 
-    renderCharts: function(logs, mode, range) {
+    formatRangeLabel: function(start, end) {
+        const sameDay =
+            start.getFullYear() === new Date(end.getTime() - 1).getFullYear() &&
+            start.getMonth() === new Date(end.getTime() - 1).getMonth() &&
+            start.getDate() === new Date(end.getTime() - 1).getDate();
+
+        if (this.currentMode === 'day' || sameDay) {
+            return start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        if (this.currentMode === 'month') {
+            return start.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
+        }
+
+        if (this.currentMode === 'year') {
+            return String(start.getFullYear());
+        }
+
+        // week
+        const endMinus1 = new Date(end.getTime() - 1);
+        const a = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const b = endMinus1.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return `${a} – ${b}`;
+    },
+
+    // Filter logs using local time range; prefer dateKeyLocal when possible
+    getLogsInRange: function(start, end) {
+        const startMs = start.getTime();
+        const endMs = end.getTime();
+
+        return (app.db.logs || []).filter(l => {
+            const dt = new Date(l.date);
+            const t = dt.getTime();
+            if (Number.isNaN(t)) return false;
+            return t >= startMs && t < endMs;
+        });
+    },
+
+    ensureCharts: function() {
         if (typeof Chart === 'undefined') return;
 
-        // Pie
-        const pieMap = {};
-        logs.forEach(l => { if(!pieMap[l.projectId]) pieMap[l.projectId] = 0; pieMap[l.projectId] += l.duration; });
-        const pieLabels = [], pieData = [], pieColors = [];
-        Object.keys(pieMap).forEach(pid => {
-            const p = app.getProject(pid);
-            pieLabels.push(p.name); pieData.push((pieMap[pid] / 60).toFixed(1)); pieColors.push(p.color);
-        });
-
-        // Bar
-        let barLabels = [], barDataMap = {};
-        if (mode === 'day') {
-            for(let i=0; i<24; i++) { barLabels.push(i + ":00"); barDataMap[i] = 0; }
-            logs.forEach(l => { barDataMap[new Date(l.date).getHours()] += l.duration; });
-        } else if (mode === 'week') {
-            const curr = new Date(range.start);
-            for(let i=0; i<7; i++) {
-                barLabels.push(`${curr.getMonth()+1}/${curr.getDate()}`);
-                barDataMap[curr.toISOString().split('T')[0]] = 0;
-                curr.setDate(curr.getDate() + 1);
-            }
-            logs.forEach(l => { const k = new Date(l.date).toISOString().split('T')[0]; if(barDataMap[k] !== undefined) barDataMap[k] += l.duration; });
-        } else if (mode === 'month') {
-            const days = range.end.getDate();
-            for(let i=1; i<=days; i++) { barLabels.push(i); barDataMap[i] = 0; }
-            logs.forEach(l => { barDataMap[new Date(l.date).getDate()] += l.duration; });
-        } else if (mode === 'year') {
-            barLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            barLabels.forEach((_, i) => barDataMap[i] = 0);
-            logs.forEach(l => { barDataMap[new Date(l.date).getMonth()] += l.duration; });
+        if (!this.charts.pie) {
+            this.charts.pie = new Chart(document.getElementById('adv-pie-chart'), {
+                type: 'doughnut',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
         }
 
-        // Render Pie
-        const ctxPie = document.getElementById('adv-pie-chart');
-        if(this.charts.pie) this.charts.pie.destroy();
-        this.charts.pie = new Chart(ctxPie, {
-            type: 'doughnut',
-            data: { labels: pieLabels.length ? pieLabels : ['No Data'], datasets: [{ data: pieData.length ? pieData : [1], backgroundColor: pieColors.length ? pieColors : ['rgba(255,255,255,0.1)'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', boxWidth: 12 } } } }
+        if (!this.charts.bar) {
+            this.charts.bar = new Chart(document.getElementById('adv-bar-chart'), {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+    },
+
+    refresh: function() {
+        const { start, end } = this.getRange();
+
+        // Update label + date input value
+        const label = document.getElementById('adv-date-label');
+        if (label) label.textContent = this.formatRangeLabel(start, end);
+
+        const picker = document.getElementById('adv-date-picker');
+        if (picker) picker.value = localDateKey(this.cursorDate);
+
+        const logs = this.getLogsInRange(start, end);
+
+        // Aggregate by project for pie
+        const byProject = {};
+        for (const l of logs) {
+            byProject[l.projectId] = (byProject[l.projectId] || 0) + (l.duration || 0);
+        }
+
+        const pieLabels = [];
+        const pieData = [];
+        const pieColors = [];
+
+        Object.keys(byProject).forEach(pid => {
+            const p = app.getProject(pid);
+            pieLabels.push(p.name);
+            pieData.push(round1(byProject[pid] / 60)); // minutes number
+            pieColors.push(p.color);
         });
 
-        // Render Bar
-        const ctxBar = document.getElementById('adv-bar-chart');
-        const wrapper = document.getElementById('adv-bar-wrapper');
-        if(wrapper) wrapper.style.width = mode === 'month' ? '800px' : '100%';
+        // Bar labels depend on mode
+        let barLabels = [];
+        let barData = [];
 
-        if(this.charts.bar) this.charts.bar.destroy();
-        this.charts.bar = new Chart(ctxBar, {
-            type: 'bar',
-            data: { labels: barLabels, datasets: [{ label: 'Minutes', data: Object.values(barDataMap).map(v=>(v/60).toFixed(1)), backgroundColor: '#3b82f6', borderRadius: 4, barThickness: mode === 'month' ? 12 : 'flex' }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
-        });
+        if (this.currentMode === 'day') {
+            // 24 hours buckets
+            const buckets = Array.from({ length: 24 }, () => 0);
+            for (const l of logs) {
+                const dt = new Date(l.date);
+                const h = dt.getHours();
+                buckets[h] += (l.duration || 0);
+            }
+            barLabels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+            barData = buckets.map(v => round1(v / 60)); // minutes
+        } else if (this.currentMode === 'week') {
+            // 7 days buckets
+            const buckets = Array.from({ length: 7 }, () => 0);
+            for (const l of logs) {
+                const dt = new Date(l.date);
+                // map to Monday-start index
+                const day = dt.getDay(); // 0 Sun .. 6 Sat
+                const idx = (day === 0) ? 6 : (day - 1); // Mon=0 ... Sun=6
+                buckets[idx] += (l.duration || 0);
+            }
+            barLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            barData = buckets.map(v => round1(v / 60));
+        } else if (this.currentMode === 'month') {
+            // daily buckets for month
+            const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+            const buckets = Array.from({ length: daysInMonth }, () => 0);
+            for (const l of logs) {
+                const dt = new Date(l.date);
+                const dayIdx = dt.getDate() - 1; // 0-based
+                if (dayIdx >= 0 && dayIdx < buckets.length) buckets[dayIdx] += (l.duration || 0);
+            }
+            barLabels = Array.from({ length: daysInMonth }, (_, i) => String(i + 1));
+            barData = buckets.map(v => round1(v / 60));
+
+            // make bar chart scrollable by width hint
+            const wrapper = document.getElementById('adv-bar-wrapper');
+            if (wrapper) wrapper.style.minWidth = `${Math.max(600, daysInMonth * 22)}px`;
+        } else {
+            // year: 12 month buckets
+            const buckets = Array.from({ length: 12 }, () => 0);
+            for (const l of logs) {
+                const dt = new Date(l.date);
+                buckets[dt.getMonth()] += (l.duration || 0);
+            }
+            barLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            barData = buckets.map(v => round1(v / 60));
+            const wrapper = document.getElementById('adv-bar-wrapper');
+            if (wrapper) wrapper.style.minWidth = `100%`;
+        }
+
+        this.ensureCharts();
+        if (!this.charts.pie || !this.charts.bar) return;
+
+        this.charts.pie.data = {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: pieColors,
+                borderWidth: 0
+            }]
+        };
+        this.charts.pie.update();
+
+        this.charts.bar.data = {
+            labels: barLabels,
+            datasets: [{
+                label: 'Min',
+                data: barData,
+                backgroundColor: '#3b82f6',
+                borderRadius: 4
+            }]
+        };
+        this.charts.bar.update();
     }
 };
 
-// Initialize after DOM load
-setTimeout(() => {
-    if(typeof AdvancedStats !== 'undefined') AdvancedStats.init();
-}, 500);
-</script>
-<script>
-    // 注册 PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker 注册成功:', reg.scope))
-                .catch(err => console.log('Service Worker 注册失败:', err));
-        });
-    }
+// Re-bind AdvancedStats mode buttons using addEventListener (no inline)
+(function bindAdvancedButtons(){
+  ['day','week','month','year'].forEach(mode => {
+    const btn = document.getElementById(`adv-btn-${mode}`);
+    if (!btn) return;
+    btn.addEventListener('click', () => AdvancedStats.switchMode(mode));
+  });
+})();
+
+// Init Advanced Stats
+AdvancedStats.init();
+
+/* =========================================================
+   3) Service Worker registration (guarded)
+   ========================================================= */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker 注册成功:', reg.scope))
+      .catch(err => console.log('Service Worker 注册失败:', err));
+  });
+}
 </script>
 
 </body>
 </html>
 
-
+   

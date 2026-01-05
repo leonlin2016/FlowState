@@ -1,587 +1,963 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 1. 优化 Title：包含品牌名和核心功能 -->
-    <title>Task Queue - FlowState Focus Timer</title>
+  <meta charset="UTF-8" />
+  <!-- 保留一条 viewport（建议允许缩放以提升可访问性） -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- 2. Meta Description：这是搜索结果里显示的那两行字，至关重要 -->
-    <meta name="description" content="Manage your daily tasks and seamlessly transition into deep work. FlowState Task Queue features drag-and-drop sorting, project tagging, and direct timer integration.">
+  <title>Task Queue - FlowState Focus Timer</title>
 
-    <!-- 3. 关键词 Keywords -->
-    <meta name="keywords" content="focus timer, todo list, task manager, pomodoro, flow state, productivity tool, dark mode">
+  <meta name="description" content="Manage your daily tasks and seamlessly transition into deep work. FlowState Task Queue features drag-and-drop sorting, project tagging, and direct timer integration.">
+  <meta name="keywords" content="focus timer, todo list, task manager, pomodoro, flow state, productivity tool, dark mode">
 
-    <!-- 4. Open Graph (OG) Tags -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="FlowState Task Queue">
-    <meta property="og:description" content="Plan your work, then click play to focus. The minimal task manager for deep work.">
-    <meta property="og:image" content="https://perfectscene.cc/preview-tasks.png">
-    <meta property="og:url" content="https://perfectscene.cc/tasks.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FlowState Task Queue">
+  <meta property="og:description" content="Plan your work, then click play to focus. The minimal task manager for deep work.">
+  <meta property="og:image" content="https://perfectscene.cc/preview-tasks.png">
+  <meta property="og:url" content="https://perfectscene.cc/tasks.html">
 
-    <!-- 5. 移动端优化 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Sortable 建议 defer，避免阻塞渲染 -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- 引入拖拽库 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --surface-color: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-green: #10b981;
-            --accent-blue: #3b82f6;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --font-main: 'Inter', sans-serif;
-        }
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --surface-color: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --font-main: 'Inter', sans-serif;
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-        /* --- Nav --- */
-        .nav {
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 600px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-        .nav a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .nav a:hover { color: var(--accent-green); }
+    /* --- Nav --- */
+    .nav {
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 600px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+    .nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav a:hover { color: var(--accent-green); }
 
-        /* --- Main Content --- */
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 0 20px;
-            /* 增加底部 padding，防止内容贴底 */
-            padding-bottom: 40px; 
-        }
+    /* --- Main Content --- */
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 0 20px;
+      padding-bottom: 40px;
+    }
 
-        /* Header Row with Clear Button */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        h1 { font-weight: 800; letter-spacing: -0.5px; font-size: 1.8rem; margin: 0; }
-        
-        .btn-clear {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.85rem;
-            padding: 5px 10px;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        .btn-clear:hover { background: rgba(255,255,255,0.05); color: #ef4444; }
+    /* Header Row with Clear Button */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h1 { font-weight: 800; letter-spacing: -0.5px; font-size: 1.8rem; margin: 0; }
 
-        /* --- Input Area --- */
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            background: var(--surface-color);
-            padding: 10px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        input[type="text"] {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 5px;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-        }
-        
-        select {
-            background: rgba(0,0,0,0.3);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 5px 10px;
-            outline: none;
-            cursor: pointer;
-            max-width: 130px;
-            font-size: 0.85rem;
-        }
-        select:hover { border-color: var(--accent-blue); color: white; }
+    .btn-clear {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-clear:hover { background: rgba(255,255,255,0.05); color: #ef4444; }
 
-        .btn-add {
-            background: var(--accent-green);
-            border: none;
-            width: 40px;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: #0f172a;
-            font-weight: bold;
-            transition: opacity 0.2s;
-        }
-        .btn-add:hover { opacity: 0.9; }
+    /* --- Input Area --- */
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      background: var(--surface-color);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
 
-        /* --- Task List --- */
-        .task-list { list-style: none; padding-bottom: 30px; }
+    input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 5px;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
 
-        .task-item {
-            background: var(--surface-color);
-            margin-bottom: 10px;
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: transform 0.2s, background 0.2s;
-            border: 1px solid transparent;
-            cursor: grab; 
-        }
-        .task-item:active { cursor: grabbing; }
-        .sortable-ghost { opacity: 0.4; background: var(--accent-blue); }
+    select {
+      background: rgba(0,0,0,0.3);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 10px;
+      outline: none;
+      cursor: pointer;
+      max-width: 130px;
+      font-size: 0.85rem;
+    }
+    select:hover { border-color: var(--accent-blue); color: white; }
 
-        .task-item:hover {
-            border-color: rgba(255,255,255,0.1);
-            background: #253146;
-        }
+    .btn-add {
+      background: var(--accent-green);
+      border: none;
+      width: 40px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #0f172a;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .btn-add:hover { opacity: 0.9; }
 
-        .task-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex: 1;
-            padding-right: 10px;
-        }
+    /* --- Presets --- */
+    .preset-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .preset-select {
+      flex: 1;
+      max-width: none;
+      height: 38px;
+    }
+    .preset-input {
+      width: 120px;
+      height: 38px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: rgba(0,0,0,0.3);
+      color: white;
+      outline: none;
+      font-size: 0.9rem;
+    }
+    .preset-add-btn {
+      width: auto;
+      padding: 0 12px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.9);
+      color: #0f172a;
+      border: none;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .preset-add-btn:hover { opacity: 0.95; }
 
-        /* Project Tag */
-        .project-tag {
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-            display: inline-block;
-        }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .preset-chip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .preset-chip:hover { border-color: rgba(255,255,255,0.18); }
 
-        .checkbox {
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--text-secondary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-        
-        .task-item.done .checkbox {
-            background: var(--text-secondary);
-            border-color: var(--text-secondary);
-            color: var(--bg-color);
-        }
-        .task-item.done .task-text {
-            text-decoration: line-through;
-            color: var(--text-secondary);
-            opacity: 0.6;
-        }
-        .task-item.done .project-tag {
-            opacity: 0.5;
-            filter: grayscale(100%);
-        }
+    /* --- Task List --- */
+    .task-list { list-style: none; padding-bottom: 30px; }
 
-        /* Actions */
-        .actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .task-item:hover .actions { opacity: 1; }
-        @media (max-width: 600px) { .actions { opacity: 1; } }
+    .task-item {
+      background: var(--surface-color);
+      margin-bottom: 10px;
+      padding: 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.2s, background 0.2s;
+      border: 1px solid transparent;
+      cursor: grab;
+    }
+    .task-item:active { cursor: grabbing; }
+    .sortable-ghost { opacity: 0.4; background: var(--accent-blue); }
 
-        .btn-icon {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid transparent;
-            cursor: pointer;
-            font-size: 1rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .btn-play { color: var(--accent-green); }
-        .btn-play:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); }
-        .btn-del { color: #ef4444; }
-        .btn-del:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
+    .task-item:hover {
+      border-color: rgba(255,255,255,0.1);
+      background: #253146;
+    }
 
-        /* --- 编辑模式样式 --- */
-        .edit-input {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--accent-blue);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-family: inherit;
-            width: 100%;
-            outline: none;
-        }
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex: 1;
+      padding-right: 10px;
+      min-width: 0;
+    }
 
-        /* --- 空状态插画样式 --- */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-            animation: fadeIn 0.5s ease;
-        }
-        .empty-icon { font-size: 4rem; margin-bottom: 15px; opacity: 0.8; display: block; }
-        .empty-text { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 5px; }
-        .empty-sub { font-size: 0.9rem; opacity: 0.7; }
+    /* Project Tag */
+    .project-tag {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      display: inline-block;
+    }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .task-text {
+      color: var(--text-primary);
+      font-size: 0.98rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
 
-        /* --- Features Section (底部功能介绍) --- */
-        .features-section {
-            margin-top: 60px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border-color);
-            opacity: 0.8; /* 稍微淡一点，不抢视觉重心 */
-            transition: opacity 0.3s;
-        }
-        .features-section:hover { opacity: 1; }
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--text-secondary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      cursor: pointer;
+      user-select: none;
+    }
 
-        .features-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 800;
-        }
+    .task-item.done .checkbox {
+      background: var(--text-secondary);
+      border-color: var(--text-secondary);
+      color: var(--bg-color);
+    }
+    .task-item.done .task-text {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+      opacity: 0.6;
+    }
+    .task-item.done .project-tag {
+      opacity: 0.5;
+      filter: grayscale(100%);
+    }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 两列布局 */
-            gap: 20px;
-        }
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .task-item:hover .actions { opacity: 1; }
+    @media (max-width: 600px) { .actions { opacity: 1; } }
 
-        @media (max-width: 600px) {
-            .features-grid { grid-template-columns: 1fr; } /* 手机端变单列 */
-        }
+    .btn-icon {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      color: var(--text-primary);
+    }
+    .btn-play { color: var(--accent-green); }
+    .btn-play:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); }
 
-        .feature-card {
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-            border: 1px solid transparent;
-            transition: background 0.2s;
-        }
-        .feature-card:hover { background: rgba(255,255,255,0.06); }
+    .btn-countdown { color: #fbbf24; } /* amber */
+    .btn-countdown:hover { background: rgba(251, 191, 36, 0.18); border-color: rgba(251, 191, 36, 0.7); }
 
-        .feature-icon { font-size: 1.5rem; line-height: 1; }
-        .feature-content h3 { font-size: 0.95rem; margin-bottom: 4px; color: var(--text-primary); }
-        .feature-content p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
+    .btn-del { color: #ef4444; }
+    .btn-del:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
 
-    </style>
+    /* --- 编辑模式样式 --- */
+    .edit-input {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--accent-blue);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      width: 100%;
+      outline: none;
+    }
+
+    /* --- 空状态插画样式 --- */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      animation: fadeIn 0.5s ease;
+      border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+    .empty-icon { font-size: 4rem; margin-bottom: 15px; opacity: 0.8; display: block; }
+    .empty-text { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 5px; }
+    .empty-sub { font-size: 0.9rem; opacity: 0.7; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- Features Section (底部功能介绍) --- */
+    .features-section {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border-color);
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+    .features-section:hover { opacity: 1; }
+
+    .features-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .preset-input { width: 110px; }
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.03);
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border: 1px solid transparent;
+      transition: background 0.2s;
+    }
+    .feature-card:hover { background: rgba(255,255,255,0.06); }
+
+    .feature-icon { font-size: 1.5rem; line-height: 1; }
+    .feature-content h3 { font-size: 0.95rem; margin-bottom: 4px; color: var(--text-primary); }
+    .feature-content p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0; }
+  </style>
 </head>
+
 <body>
+  <nav class="nav">
+    <a href="index.html">
+      <span style="font-size: 1.2rem;">‹</span> Back to Timer
+    </a>
+    <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px;">TASK QUEUE</span>
+  </nav>
 
-    <nav class="nav">
-        <a href="index.html">
-            <span style="font-size: 1.2rem;">‹</span> Back to Timer
-        </a>
-        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px;">TASK QUEUE</span>
-    </nav>
-
-    <div class="container">
-        <div class="header-row">
-            <h1>What's next?</h1>
-            <button class="btn-clear" onclick="clearCompleted()">Clear Done 🧹</button>
-        </div>
-        
-        <div class="input-group">
-            <input type="text" id="taskInput" placeholder="Add a new task..." onkeypress="handleEnter(event)">
-            <select id="projectSelect"></select>
-            <button class="btn-add" onclick="addTask()">＋</button>
-        </div>
-
-        <ul class="task-list" id="taskList">
-            <!-- Tasks will be injected here -->
-        </ul>
-
-        <!-- Features / Help Section -->
-        <div class="features-section">
-            <h2 class="features-title">How it works</h2>
-            
-            <div class="features-grid">
-                <!-- Feature 1 -->
-                <div class="feature-card">
-                    <div class="feature-icon">🚀</div>
-                    <div class="feature-content">
-                        <h3>Seamless Focus</h3>
-                        <p>Click the <strong>Play (▶)</strong> button to carry your task directly into the timer.</p>
-                    </div>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="feature-card">
-                    <div class="feature-icon">🖱️</div>
-                    <div class="feature-content">
-                        <h3>Drag & Sort</h3>
-                        <p>Priorities change. Drag any task to reorder your list instantly.</p>
-                    </div>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="feature-card">
-                    <div class="feature-icon">⚡️</div>
-                    <div class="feature-content">
-                        <h3>Quick Actions</h3>
-                        <p><strong>Double-click</strong> text to edit. Use "Clear Done" to sweep away finished tasks.</p>
-                    </div>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="feature-card">
-                    <div class="feature-icon">🏷️</div>
-                    <div class="feature-content">
-                        <h3>Smart Tags</h3>
-                        <p>Tags automatically sync colors with your project settings.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- SEO Footer Text (Hidden visually but good for structure) -->
-            <p style="text-align: center; margin-top: 30px; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.5;">
-                FlowState Task Manager — Designed for Deep Work & Productivity.
-            </p>
-        </div>
-
+  <div class="container">
+    <div class="header-row">
+      <h1>What's next?</h1>
+      <button class="btn-clear" id="clearDoneBtn">Clear Done 🧹</button>
     </div>
 
-    <script>
-        // --- 1. 读取主页的数据库 ---
-        let db = { projects: [] };
-        try {
-            const raw = localStorage.getItem('flowStateDB');
-            if (raw) db = JSON.parse(raw);
-            if (!db.projects || db.projects.length === 0) {
-                db.projects = [{id: 'default', name: 'General', color: '#94a3b8'}];
-            }
-        } catch (e) {
-            console.error("DB Error", e);
-            db.projects = [{id: 'default', name: 'General', color: '#94a3b8'}];
-        }
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Add a new task..." autocomplete="off">
+      <select id="projectSelect"></select>
+      <button class="btn-add" id="addTaskBtn">＋</button>
+    </div>
 
-        // --- 2. 渲染下拉菜单 ---
-        const projectSelect = document.getElementById('projectSelect');
-        projectSelect.innerHTML = db.projects.map(p => 
-            `<option value="${p.id}">${p.name}</option>`
-        ).join('');
+    <!-- Countdown preset controls -->
+    <div class="preset-row">
+      <select id="focusPresetSelect" class="preset-select" title="Countdown preset"></select>
+      <input id="focusPresetInput" class="preset-input" type="number" min="1" max="360" placeholder="Minutes" title="Add custom preset (minutes)">
+      <button id="focusPresetAddBtn" class="preset-add-btn" type="button">Add</button>
+    </div>
+    <div id="focusPresetChips" class="preset-chips"></div>
 
-        // --- 3. 任务管理逻辑 ---
-        let tasks = JSON.parse(localStorage.getItem('flowTasks')) || [];
+    <ul class="task-list" id="taskList"></ul>
 
-        function saveTasks() {
-            localStorage.setItem('flowTasks', JSON.stringify(tasks));
-            renderTasks();
-        }
+    <div class="features-section" id="how-it-works">
+  <h2 class="features-title">How it works</h2>
 
-        function addTask() {
-            const input = document.getElementById('taskInput');
-            const text = input.value.trim();
-            const projectId = projectSelect.value;
-            
-            if (!text) return;
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">▶</div>
+      <div class="feature-content">
+        <h3>Start Focus in One Click</h3>
+        <p>
+          Click <strong>Play (▶)</strong> to send the task name and project straight into the <strong>focus timer</strong>.
+          Less setup, less context switching.
+        </p>
+      </div>
+    </div>
 
-            tasks.unshift({ 
-                id: Date.now(), 
-                text: text, 
-                projectId: projectId, 
-                done: false 
-            });
-            input.value = '';
-            saveTasks();
-        }
+    <div class="feature-card">
+      <div class="feature-icon">⏳</div>
+      <div class="feature-content">
+        <h3>Pomodoro-Style Countdown Presets</h3>
+        <p>
+          Use the <strong>Countdown</strong> button to start a preset session (for example 25 minutes).
+          Perfect for <strong>Pomodoro</strong>, time-boxing, and study sprints.
+        </p>
+      </div>
+    </div>
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') addTask();
-        }
+    <div class="feature-card">
+      <div class="feature-icon">🖱️</div>
+      <div class="feature-content">
+        <h3>Drag & Drop Priorities</h3>
+        <p>
+          Your plan changes—your list should too.
+          Drag and drop any item to reorder your <strong>task queue</strong> instantly.
+        </p>
+      </div>
+    </div>
 
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.done = !task.done;
-                saveTasks();
-            }
-        }
+    <div class="feature-card">
+      <div class="feature-icon">🏷️</div>
+      <div class="feature-content">
+        <h3>Projects & Smart Tags</h3>
+        <p>
+          Assign tasks to projects for a cleaner <strong>task list</strong>.
+          Tags match your project colors automatically so your queue stays readable.
+        </p>
+      </div>
+    </div>
 
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveTasks();
-        }
+    <div class="feature-card">
+      <div class="feature-icon">✍️</div>
+      <div class="feature-content">
+        <h3>Edit Fast, Keep Momentum</h3>
+        <p>
+          <strong>Double-click</strong> a task to edit it in place.
+          Small friction removed = more deep work.
+        </p>
+      </div>
+    </div>
 
-        function clearCompleted() {
-            if(confirm('Remove all completed tasks?')) {
-                tasks = tasks.filter(t => !t.done);
-                saveTasks();
-            }
-        }
+    <div class="feature-card">
+      <div class="feature-icon">✅</div>
+      <div class="feature-content">
+        <h3>Finish, Clear, Repeat</h3>
+        <p>
+          Mark tasks done as you go, then use <strong>Clear Done</strong> to sweep finished items.
+          Keep today’s queue short and focused.
+        </p>
+      </div>
+    </div>
+  </div>
 
-        // --- 4. 双击编辑逻辑 ---
-        function enableEdit(id, element) {
-            const task = tasks.find(t => t.id === id);
-            if (!task || task.done) return; 
+  <p style="text-align: center; margin-top: 30px; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.6;">
+    FlowState Task Queue — a minimal <strong>task manager</strong> with <strong>Pomodoro countdown</strong> and a built-in <strong>focus timer</strong> for deep work.
+  </p>
+</div>
 
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = task.text;
-            input.className = 'edit-input';
-            
-            element.innerHTML = '';
-            element.appendChild(input);
-            input.focus();
 
-            const save = () => {
-                const newText = input.value.trim();
-                if (newText) {
-                    task.text = newText;
-                    saveTasks(); 
-                } else {
-                    renderTasks(); // 撤销更改
-                }
-            };
+  <script>
+    // -------------------------
+    // 0) Helpers
+    // -------------------------
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
 
-            input.addEventListener('blur', save);
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') save();
-            });
-        }
+    // -------------------------
+    // 1) 读取主页数据库（projects）
+    // -------------------------
+    let db = { projects: [] };
+    try {
+      const raw = localStorage.getItem('flowStateDB');
+      if (raw) db = JSON.parse(raw);
+      if (!db.projects || db.projects.length === 0) {
+        db.projects = [{ id: 'default', name: 'General', color: '#94a3b8' }];
+      }
+    } catch (e) {
+      console.error("DB Error", e);
+      db.projects = [{ id: 'default', name: 'General', color: '#94a3b8' }];
+    }
 
-        // --- 5. 核心跳转逻辑 ---
-        function startFocus(text, projectId) {
-            const url = `index.html?task=${encodeURIComponent(text)}&projectId=${projectId}&mode=stopwatch&autoStart=true`;
-            window.location.href = url;
-        }
+    // -------------------------
+    // 2) 渲染项目下拉（安全：不拼 innerHTML）
+    // -------------------------
+    const projectSelect = document.getElementById('projectSelect');
+    function renderProjectSelect() {
+      projectSelect.textContent = '';
+      for (const p of db.projects) {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        projectSelect.appendChild(opt);
+      }
+    }
+    renderProjectSelect();
 
-        function getProjectInfo(pid) {
-            const p = db.projects.find(i => i.id === pid);
-            return p ? p : { name: 'General', color: '#94a3b8' };
-        }
+    // -------------------------
+    // 3) Countdown 预设：可自定义
+    // -------------------------
+    const PRESETS_KEY = 'flowFocusPresetsMin';
+    const PRESET_SELECTED_KEY = 'flowFocusPresetMinSelected';
 
-        function updateOrderFromDOM() {
-            const list = document.getElementById('taskList');
-            const newOrderIds = Array.from(list.children).map(li => Number(li.dataset.id));
-            tasks.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
-            localStorage.setItem('flowTasks', JSON.stringify(tasks));
-        }
+    const presetSelect = document.getElementById('focusPresetSelect');
+    const presetInput = document.getElementById('focusPresetInput');
+    const presetAddBtn = document.getElementById('focusPresetAddBtn');
+    const presetChips = document.getElementById('focusPresetChips');
 
-        function renderTasks() {
-            const list = document.getElementById('taskList');
-            list.innerHTML = '';
+    function loadPresets() {
+      try {
+        const raw = localStorage.getItem(PRESETS_KEY);
+        const arr = raw ? JSON.parse(raw) : null;
+        const presets = Array.isArray(arr) ? arr : [15, 25, 50];
+        return presets
+          .map(Number)
+          .filter(n => Number.isFinite(n) && n >= 1 && n <= 360);
+      } catch {
+        return [15, 25, 50];
+      }
+    }
 
-            // 空状态
-            if (tasks.length === 0) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <span class="empty-icon">🏝️</span>
-                        <div class="empty-text">All caught up!</div>
-                        <div class="empty-sub">Time to relax or add a new challenge.</div>
-                    </div>`;
-                return;
-            }
+    function savePresets(presets) {
+      const uniq = Array.from(new Set(presets))
+        .map(n => Math.floor(n))
+        .filter(n => Number.isFinite(n) && n >= 1 && n <= 360)
+        .sort((a, b) => a - b);
 
-            tasks.forEach(task => {
-                const li = document.createElement('li');
-                li.className = `task-item ${task.done ? 'done' : ''}`;
-                li.dataset.id = task.id;
-                
-                const project = getProjectInfo(task.projectId);
-                const bgStyle = `${project.color}26`; 
-                const textStyle = project.color;
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(uniq));
+      return uniq;
+    }
 
-                li.innerHTML = `
-                    <div class="task-left">
-                        <div class="checkbox" onclick="toggleTask(${task.id})">${task.done ? '✔' : ''}</div>
-                        <div style="flex:1; padding-right: 10px;">
-                            <div class="task-text" 
-                                 ondblclick="enableEdit(${task.id}, this)" 
-                                 title="Double click to edit"
-                                 style="font-weight:500; margin-bottom:4px; cursor:text;">
-                                 ${task.text}
-                            </div>
-                            <span class="project-tag" style="background-color: ${bgStyle}; color: ${textStyle}; border: 1px solid ${project.color}40;">
-                                ${project.name}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button class="btn-icon btn-play" onclick="startFocus('${task.text}', '${task.projectId}')" title="Start Focus">
-                            ▶
-                        </button>
-                        <button class="btn-icon btn-del" onclick="deleteTask(${task.id})" title="Delete">
-                            ✕
-                        </button>
-                    </div>
-                `;
-                list.appendChild(li);
-            });
-        }
+    function getSelectedPreset(presets) {
+      const saved = Number(localStorage.getItem(PRESET_SELECTED_KEY));
+      if (Number.isFinite(saved) && presets.includes(saved)) return saved;
+      return presets[0] || 25;
+    }
 
-        // --- 6. 初始化 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderTasks();
+    function renderPresetsUI() {
+      const presets = loadPresets();
+      const selected = getSelectedPreset(presets);
 
-            const list = document.getElementById('taskList');
-            new Sortable(list, {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                delay: 100, 
-                delayOnTouchOnly: true,
-                onEnd: function (evt) {
-                    updateOrderFromDOM();
-                }
-            });
+      presetSelect.textContent = '';
+      for (const m of presets) {
+        const opt = document.createElement('option');
+        opt.value = String(m);
+        opt.textContent = `${m}m Countdown`;
+        if (m === selected) opt.selected = true;
+        presetSelect.appendChild(opt);
+      }
+
+      presetChips.textContent = '';
+      for (const m of presets) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'preset-chip';
+        chip.textContent = `${m}m ✖`;
+        chip.title = `Remove ${m}m preset`;
+
+        chip.addEventListener('click', () => {
+          let next = presets.filter(x => x !== m);
+          if (next.length === 0) next = [25]; // 至少保留一个
+          next = savePresets(next);
+
+          const currentSelected = Number(presetSelect.value);
+          if (!next.includes(currentSelected)) {
+            localStorage.setItem(PRESET_SELECTED_KEY, String(next[0]));
+          }
+          renderPresetsUI();
         });
-    </script>
+
+        presetChips.appendChild(chip);
+      }
+
+      localStorage.setItem(PRESET_SELECTED_KEY, String(selected));
+    }
+
+    presetSelect.addEventListener('change', () => {
+      localStorage.setItem(PRESET_SELECTED_KEY, presetSelect.value);
+    });
+
+    presetAddBtn.addEventListener('click', () => {
+      const m = Number(presetInput.value);
+      if (!Number.isFinite(m) || m < 1 || m > 360) {
+        alert('Please enter minutes between 1 and 360.');
+        return;
+      }
+      const minute = Math.floor(m);
+      savePresets([...loadPresets(), minute]);
+      localStorage.setItem(PRESET_SELECTED_KEY, String(minute));
+      presetInput.value = '';
+      renderPresetsUI();
+    });
+
+    presetInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') presetAddBtn.click();
+    });
+
+    renderPresetsUI();
+
+    // -------------------------
+    // 4) 任务管理数据
+    // -------------------------
+    let tasks = [];
+    try {
+      tasks = JSON.parse(localStorage.getItem('flowTasks')) || [];
+    } catch {
+      tasks = [];
+    }
+
+    function saveTasksOnly() {
+      localStorage.setItem('flowTasks', JSON.stringify(tasks));
+    }
+
+    function saveTasksAndRender() {
+      saveTasksOnly();
+      renderTasks();
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      const projectId = projectSelect.value;
+
+      if (!text) return;
+
+      tasks.unshift({
+        id: Date.now(),
+        text,
+        projectId,
+        done: false
+      });
+
+      input.value = '';
+      saveTasksAndRender();
+    }
+
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      task.done = !task.done;
+      saveTasksAndRender();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasksAndRender();
+    }
+
+    function clearDone() {
+      tasks = tasks.filter(t => !t.done);
+      saveTasksAndRender();
+    }
+
+    function updateTaskText(id, newText) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      const trimmed = (newText || '').trim();
+      if (!trimmed) return;
+      task.text = trimmed;
+      saveTasksAndRender();
+    }
+
+    // -------------------------
+    // 5) 跳转到首页执行（stopwatch / countdown）
+    // -------------------------
+    function startFocus(text, projectId, opts = {}) {
+      const url = new URL('./index.html', location.href);
+
+      url.searchParams.set('task', text);
+      url.searchParams.set('projectId', projectId);
+
+      url.searchParams.set('mode', opts.mode || 'stopwatch');
+
+      // duration in seconds (used for pomodoro countdown)
+      if (opts.mode === 'pomodoro' && Number.isFinite(opts.durationSec)) {
+        url.searchParams.set('duration', String(Math.floor(opts.durationSec)));
+      }
+
+      if (opts.autoStart) url.searchParams.set('autoStart', 'true');
+
+      location.href = url.toString();
+    }
+
+    function startStopwatch(task) {
+      startFocus(task.text, task.projectId, { mode: 'stopwatch', autoStart: true });
+    }
+
+    function startCountdown(task) {
+      const minutes = Number(presetSelect.value || 25);
+      const durationSec = clamp(minutes * 60, 60, 6 * 60 * 60); // 1min ~ 6h
+      startFocus(task.text, task.projectId, { mode: 'pomodoro', durationSec, autoStart: true });
+    }
+
+    // -------------------------
+    // 6) 渲染任务列表（安全：不拼 innerHTML）
+    // -------------------------
+    const taskList = document.getElementById('taskList');
+
+    function getProjectMeta(projectId) {
+      const p = (db.projects || []).find(x => x.id === projectId);
+      if (!p) return { name: 'General', color: '#94a3b8' };
+      return { name: p.name || 'Project', color: p.color || '#94a3b8' };
+    }
+
+    function renderTasks() {
+      taskList.textContent = '';
+
+      if (!tasks.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+
+        const icon = document.createElement('span');
+        icon.className = 'empty-icon';
+        icon.textContent = '🗒️';
+
+        const t1 = document.createElement('div');
+        t1.className = 'empty-text';
+        t1.textContent = "No tasks yet";
+
+        const t2 = document.createElement('div');
+        t2.className = 'empty-sub';
+        t2.textContent = "Add something above, then hit ▶ or ⏳ to start.";
+
+        empty.appendChild(icon);
+        empty.appendChild(t1);
+        empty.appendChild(t2);
+
+        taskList.appendChild(empty);
+        return;
+      }
+
+      for (const task of tasks) {
+        const li = document.createElement('li');
+        li.className = 'task-item' + (task.done ? ' done' : '');
+        li.dataset.taskId = String(task.id);
+
+        const left = document.createElement('div');
+        left.className = 'task-left';
+
+        const checkbox = document.createElement('div');
+        checkbox.className = 'checkbox';
+        checkbox.dataset.action = 'toggle-done';
+        checkbox.title = task.done ? 'Mark as not done' : 'Mark as done';
+        checkbox.textContent = task.done ? '✓' : '';
+
+        const meta = getProjectMeta(task.projectId);
+
+        const tag = document.createElement('span');
+        tag.className = 'project-tag';
+        tag.textContent = meta.name;
+        tag.style.background = meta.color;
+        tag.style.color = '#0f172a';
+
+        const text = document.createElement('div');
+        text.className = 'task-text';
+        text.textContent = task.text;
+        text.dataset.action = 'edit-task';
+        text.title = 'Double-click to edit';
+
+        left.appendChild(checkbox);
+        left.appendChild(tag);
+        left.appendChild(text);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+
+        const btnPlay = document.createElement('button');
+        btnPlay.type = 'button';
+        btnPlay.className = 'btn-icon btn-play';
+        btnPlay.dataset.action = 'start-stopwatch';
+        btnPlay.title = 'Start Flow (stopwatch)';
+        btnPlay.textContent = '▶';
+
+        const btnCd = document.createElement('button');
+        btnCd.type = 'button';
+        btnCd.className = 'btn-icon btn-countdown';
+        btnCd.dataset.action = 'start-countdown';
+        btnCd.title = 'Start Countdown (pomodoro)';
+        btnCd.textContent = '⏳';
+
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.className = 'btn-icon btn-del';
+        btnDel.dataset.action = 'delete-task';
+        btnDel.title = 'Delete task';
+        btnDel.textContent = '✖';
+
+        actions.appendChild(btnPlay);
+        actions.appendChild(btnCd);
+        actions.appendChild(btnDel);
+
+        li.appendChild(left);
+        li.appendChild(actions);
+        taskList.appendChild(li);
+      }
+    }
+
+    renderTasks();
+
+    // -------------------------
+    // 7) 事件绑定（无内联）
+    // -------------------------
+    document.getElementById('addTaskBtn').addEventListener('click', addTask);
+    document.getElementById('taskInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addTask();
+    });
+    document.getElementById('clearDoneBtn').addEventListener('click', clearDone);
+
+    // Delegation for task actions
+    taskList.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+
+      const item = btn.closest('[data-task-id]');
+      if (!item) return;
+
+      const id = Number(item.dataset.taskId);
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      const action = btn.dataset.action;
+
+      if (action === 'toggle-done') {
+        toggleTask(id);
+        return;
+      }
+
+      if (action === 'delete-task') {
+        deleteTask(id);
+        return;
+      }
+
+      if (action === 'start-stopwatch') {
+        startStopwatch(task);
+        return;
+      }
+
+      if (action === 'start-countdown') {
+        startCountdown(task);
+        return;
+      }
+    });
+
+    // Double click to edit
+    taskList.addEventListener('dblclick', (e) => {
+      const target = e.target.closest('[data-action="edit-task"]');
+      if (!target) return;
+
+      const item = target.closest('[data-task-id]');
+      if (!item) return;
+
+      const id = Number(item.dataset.taskId);
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      // Replace text with input
+      const input = document.createElement('input');
+      input.className = 'edit-input';
+      input.type = 'text';
+      input.value = task.text;
+
+      target.replaceWith(input);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+
+      const commit = () => {
+        updateTaskText(id, input.value);
+      };
+
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') commit();
+        if (ev.key === 'Escape') renderTasks();
+      });
+
+      input.addEventListener('blur', commit);
+    });
+
+    // -------------------------
+    // 8) Sortable (拖拽排序)
+    // -------------------------
+    function initSortable() {
+      if (typeof Sortable === 'undefined') return;
+
+      new Sortable(taskList, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: () => {
+          // 根据 DOM 顺序重排 tasks
+          const ids = Array.from(taskList.querySelectorAll('[data-task-id]'))
+            .map(el => Number(el.dataset.taskId))
+            .filter(n => Number.isFinite(n));
+
+          // 空状态时 ids 会为空
+          if (!ids.length) return;
+
+          const map = new Map(tasks.map(t => [t.id, t]));
+          const next = [];
+          for (const id of ids) {
+            const t = map.get(id);
+            if (t) next.push(t);
+          }
+
+          // 防御：如果有遗漏（理论上不该），补回去
+          if (next.length !== tasks.length) {
+            const inNext = new Set(next.map(x => x.id));
+            for (const t of tasks) if (!inNext.has(t.id)) next.push(t);
+          }
+
+          tasks = next;
+          saveTasksOnly(); // 不需要 render（DOM 已经是排序后的）
+        }
+      });
+    }
+
+    // Sortable 脚本是 defer，DOMContentLoaded 时通常已就绪
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSortable);
+    } else {
+      initSortable();
+    }
+  </script>
 </body>
 </html>
