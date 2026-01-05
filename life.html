@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- SEO & Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Calendar | TimerMode</title>
-    <meta name="description" content="A Memento Mori chart visualizing your life in weeks. See your past, present, and future in a minimalist 90-year grid.">
-    <meta name="keywords" content="Life calendar, Memento mori chart, Weeks of my life, mortality visualization, stoic tools">
-
-    <!-- Fonts -->
+    <title>Life Grid | TimerMode</title>
+    <meta name="description" content="Visualize your life in Years, Months, or Weeks. A Memento Mori tool to spark urgency and focus.">
+    
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --bg-color: #0f172a;
-            --sidebar-bg: rgba(15, 23, 42, 0.95);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --accent-blue: #3b82f6;
             --accent-red: #ef4444;
-            --accent-green: #10b981;
-            --grid-gap: 3px;
             --border-color: rgba(255, 255, 255, 0.08);
+            --box-past: #334155;
+            --box-future: rgba(255, 255, 255, 0.05);
+            --input-bg: rgba(0,0,0,0.3);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,261 +34,513 @@
             padding: 40px 20px;
         }
 
-        /* --- Header & Controls --- */
-        .header-section {
-            text-align: center;
-            margin-bottom: 30px;
-            max-width: 600px;
-            width: 100%;
-            animation: fadeIn 0.8s ease;
-        }
+        /* Header */
+        .header-section { text-align: center; margin-bottom: 30px; max-width: 600px; width: 100%; }
+        .brand-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
+        .subtitle { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5; }
 
-        .brand-title {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
+        /* Clock */
+        .life-timer-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 20px;
             margin-bottom: 25px;
-            line-height: 1.5;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.05);
+            backdrop-filter: blur(10px);
         }
 
+        .life-timer-digits {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            line-height: 1;
+        }
+
+        .digit-group { display: flex; flex-direction: column; align-items: center; }
+        .digit-label { font-size: 0.6rem; color: var(--text-secondary); margin-top: 5px; font-weight: 600; letter-spacing: 1px; }
+        .digit-sep { opacity: 0.5; animation: blink 1s infinite; margin-top: -5px; }
+        @keyframes blink { 50% { opacity: 0.2; } }
+
+        /* Controls */
         .control-panel {
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid var(--border-color);
             padding: 20px;
             border-radius: 12px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
+            display: flex; flex-direction: column; gap: 20px; align-items: center;
             backdrop-filter: blur(10px);
-            flex-wrap: wrap;
-        }
-
-        .date-input {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .stats-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--accent-blue);
-            background: rgba(59, 130, 246, 0.1);
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-
-        /* --- The Life Grid --- */
-        .grid-container {
-            display: grid;
-            /* 52 weeks per row */
-            grid-template-columns: repeat(52, 1fr); 
-            gap: var(--grid-gap);
             width: 100%;
-            max-width: 1000px;
-            padding: 20px;
+        }
+
+        .view-switcher { display: flex; background: var(--input-bg); border-radius: 8px; padding: 4px; border: 1px solid var(--border-color); }
+        .view-btn { background: none; border: none; color: var(--text-secondary); padding: 8px 16px; font-size: 0.85rem; cursor: pointer; border-radius: 6px; font-weight: 600; transition: 0.2s; }
+        .view-btn.active { background: var(--accent-blue); color: white; }
+
+        .input-group-wrapper { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .input-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .date-input { background: var(--input-bg); border: 1px solid var(--border-color); color: white; padding: 8px 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; outline: none; cursor: pointer; text-align: center; }
+        
+        .stats-row { display: flex; gap: 15px; font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px; }
+        .highlight { color: var(--accent-blue); font-weight: bold; font-family: 'JetBrains Mono'; }
+
+        /* --- NEW: Chapter Manager Styles --- */
+        .chapter-manager {
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            margin-top: 5px;
+        }
+        
+        details > summary {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            list-style: none;
+            text-align: center;
+        }
+        details > summary:hover { color: white; }
+
+        .chapter-form {
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+            margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;
+        }
+        
+        .chap-input {
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem;
+        }
+        
+        .btn-add {
+            background: var(--accent-blue); color: white; border: none;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+        }
+        .btn-add:hover { opacity: 0.9; }
+
+        .chapter-list {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px;
+        }
+        
+        .chapter-tag {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;
+            color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .btn-del {
+            background: none; border: none; color: rgba(255,255,255,0.7);
+            cursor: pointer; font-size: 1rem; line-height: 1;
+        }
+        .btn-del:hover { color: white; }
+
+        /* --- Decade Layout System --- */
+        .main-container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 20px; }
+        .decade-section { display: flex; flex-direction: column; gap: 5px; }
+        .decade-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; opacity: 0.5; margin-left: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .decade-grid {
+            display: grid; gap: 4px; padding: 10px;
             background: rgba(30, 41, 59, 0.3);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 20px 50px -20px rgba(0,0,0,0.5);
+            border-radius: 8px; border: 1px solid var(--border-color);
         }
+        .decade-grid.mode-weeks { grid-template-columns: repeat(52, 1fr); gap: 2px; }
+        .decade-grid.mode-months { grid-template-columns: repeat(12, 1fr); gap: 6px; }
+        .decade-grid.mode-years { grid-template-columns: repeat(10, 1fr); gap: 10px; }
 
-        .week-box {
-            aspect-ratio: 1;
-            border-radius: 1px;
-            background-color: rgba(255, 255, 255, 0.03);
-            transition: all 0.3s ease;
-            position: relative;
+        .life-box {
+            aspect-ratio: 1; border-radius: 2px;
+            background-color: var(--box-future); position: relative;
         }
-
-        /* States */
-        .week-box.past {
-            background-color: #334155; /* Slate 700 */
-        }
-
-        .week-box.current {
+        
+        .life-box.past { background-color: var(--box-past); }
+        .life-box.current {
             background-color: var(--accent-blue);
             box-shadow: 0 0 10px var(--accent-blue);
-            z-index: 2;
-            transform: scale(1.5);
-            border-radius: 2px;
-            animation: pulse 2s infinite;
+            z-index: 2; animation: pulse 2s infinite;
         }
 
-        .week-box.future {
-            /* Empty */
-        }
+        /* Healthspan Gradients */
+        .life-box.prime { opacity: 1; }
+        .life-box.decline-1 { opacity: 0.7; }
+        .life-box.decline-2 { opacity: 0.3; border: 1px dashed rgba(255,255,255,0.2); background: transparent; }
         
-        /* Decade Markers (Optional visual aid) */
-        .week-box:nth-child(520n) { /* Every 10 years */
-            border-bottom: 2px solid rgba(255,255,255,0.1);
-        }
+        /* Milestone Marker */
+        .life-box.milestone { border: 1px solid var(--accent-blue); }
 
-        /* Hover Effect */
-        .week-box:hover {
-            transform: scale(2);
-            z-index: 10;
-            background-color: white;
+        /* Tooltip */
+        .life-box:hover { transform: scale(1.5); z-index: 10; }
+        .life-box:hover::after {
+            content: attr(data-info);
+            position: absolute; bottom: 140%; left: 50%; transform: translateX(-50%);
+            background: black; color: white; padding: 6px 10px; border-radius: 6px;
+            font-size: 11px; white-space: pre; text-align: left; pointer-events: none;
+            border: 1px solid var(--border-color); z-index: 20;
+            min-width: 120px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        
-        .week-box:hover::after {
-            content: attr(data-age);
-            position: absolute;
-            bottom: 150%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: black;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            white-space: nowrap;
-            pointer-events: none;
-            border: 1px solid var(--border-color);
-        }
-
-        /* --- Footer / Legend --- */
-        .legend {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 10px; height: 10px; border-radius: 2px; }
-
-        .back-link {
-            margin-top: 40px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            display: flex; align-items: center; gap: 5px;
-        }
-        .back-link:hover { color: white; }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .back-link { margin-top: 30px; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+        .back-link:hover { color: white; }
 
-        /* Mobile Optimization */
         @media (max-width: 768px) {
-            .grid-container { gap: 1px; padding: 10px; }
-            .brand-title { font-size: 1.5rem; }
-            /* On very small screens, 52 cols is tight, but we keep it for the "Life" metaphor */
+            .decade-grid.mode-weeks { grid-template-columns: repeat(26, 1fr); }
+            .decade-grid.mode-months { grid-template-columns: repeat(6, 1fr); }
+            .decade-grid.mode-years { grid-template-columns: repeat(5, 1fr); }
+            .life-timer-digits { font-size: 1.5rem; gap: 5px; }
+            .chapter-form { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
     <div class="header-section">
-        <h1 class="brand-title">Memento Mori</h1>
-        <p class="subtitle">
-            Each square represents one week of your life.<br>
-            You have <strong>90 years</strong> (4,680 weeks) on this grid.
-        </p>
+        <h1 class="brand-title">Life Grid</h1>
+        <p class="subtitle">Visualize your time on Earth. <br>Memento Mori.</p>
+
+        <div class="life-timer-box">
+            <div class="life-timer-digits">
+                <div class="digit-group"><span id="lc-years">00</span><span class="digit-label">YEARS</span></div>
+                <div class="digit-sep">:</div>
+                <div class="digit-group"><span id="lc-days">000</span><span class="digit-label">DAYS</span></div>
+                <div class="digit-sep">:</div>
+                <div class="digit-group"><span id="lc-hours">00</span><span class="digit-label">HRS</span></div>
+                <div class="digit-sep">:</div>
+                <div class="digit-group"><span id="lc-min">00</span><span class="digit-label">MIN</span></div>
+                <div class="digit-sep">:</div>
+                <div class="digit-group"><span id="lc-sec" style="color:var(--accent-red)">00</span><span class="digit-label">SEC</span></div>
+            </div>
+        </div>
 
         <div class="control-panel">
-            <div style="display:flex; flex-direction:column; align-items:flex-start; gap:5px;">
-                <label style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">Your Birthday</label>
-                <input type="date" id="birth-date" class="date-input">
+            <div class="view-switcher">
+                <button class="view-btn" onclick="setMode('years')">Years</button>
+                <button class="view-btn" onclick="setMode('months')">Months</button>
+                <button class="view-btn active" onclick="setMode('weeks')">Weeks</button>
             </div>
-            <div id="stats-area" style="display:none; gap:10px; flex-wrap:wrap;">
-                <div class="stats-badge">Lived: <span id="lived-pct">0%</span></div>
-                <div class="stats-badge" style="color:var(--text-secondary);">Left: <span id="weeks-left">0</span> wks</div>
+            
+            <div class="input-group-wrapper">
+                <div class="input-item">
+                    <label style="font-size:0.75rem; color:var(--text-secondary);">Birthday</label>
+                    <input type="date" id="birth-date" class="date-input">
+                </div>
+                <div class="input-item">
+                    <label style="font-size:0.75rem; color:var(--text-secondary);">Target Age</label>
+                    <input type="number" id="target-age" class="date-input" value="90" min="1" max="150" style="width: 80px;">
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <span>Lived: <span id="stat-lived" class="highlight">0%</span></span>
+                <span>Remaining: <span id="stat-left" class="highlight">--</span></span>
+            </div>
+
+            <!-- NEW: Chapter Manager -->
+            <div class="chapter-manager">
+                <details>
+                    <summary>▼ Manage Life Chapters</summary>
+                    <div class="chapter-form">
+                        <input type="text" id="chap-title" class="chap-input" placeholder="Chapter Name (e.g. Uni)" style="flex:1;">
+                        <input type="date" id="chap-start" class="chap-input">
+                        <input type="date" id="chap-end" class="chap-input">
+                        <input type="color" id="chap-color" class="chap-input" value="#3b82f6" style="width:50px; padding:0;">
+                        <button class="btn-add" onclick="addChapter()">Add</button>
+                    </div>
+                    <div id="chapter-list" class="chapter-list"></div>
+                </details>
             </div>
         </div>
     </div>
 
-    <!-- The 90x52 Grid -->
-    <div id="life-grid" class="grid-container"></div>
-
-    <div class="legend">
-        <div class="legend-item"><div class="dot" style="background:#334155"></div> Past</div>
-        <div class="legend-item"><div class="dot" style="background:var(--accent-blue); box-shadow:0 0 5px var(--accent-blue);"></div> Present</div>
-        <div class="legend-item"><div class="dot" style="background:rgba(255,255,255,0.1)"></div> Future</div>
-    </div>
+    <div id="life-container" class="main-container"></div>
 
     <a href="index.html" class="back-link">← Back to Dashboard</a>
 
     <script>
-        const TOTAL_YEARS = 90;
-        const WEEKS_PER_YEAR = 52;
-        const TOTAL_WEEKS = TOTAL_YEARS * WEEKS_PER_YEAR;
-        
-        // Default to a generic date if not set
+        const MILESTONES = {
+            19: "Mark Zuckerberg launched Facebook", 21: "Steve Jobs co-founded Apple", 23: "Oprah Winfrey became a news anchor",
+            26: "Einstein published Special Relativity", 30: "Jeff Bezos started Amazon", 40: "Stan Lee created The Fantastic Four",
+            52: "Ray Kroc franchised McDonald's", 65: "Colonel Sanders franchised KFC"
+        };
+
+        let targetLifespan = 90; 
+        let currentMode = 'weeks';
         const defaultDate = '2000-01-01';
+        let lifeInterval; 
+        let chapters = []; // Store user chapters
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedDob = localStorage.getItem('fs_dob');
-            const dateInput = document.getElementById('birth-date');
+            const savedDob = localStorage.getItem('fs_dob') || defaultDate;
+            document.getElementById('birth-date').value = savedDob;
             
-            if (savedDob) {
-                dateInput.value = savedDob;
-                renderGrid(new Date(savedDob));
-            } else {
-                // Render empty or demo grid
-                renderGrid(new Date(defaultDate));
+            const savedAge = localStorage.getItem('fs_lifespan');
+            if (savedAge) {
+                targetLifespan = parseInt(savedAge);
+                document.getElementById('target-age').value = targetLifespan;
             }
 
-            dateInput.addEventListener('change', (e) => {
-                const dob = new Date(e.target.value);
+            // Load Chapters
+            const savedChapters = localStorage.getItem('fs_chapters');
+            if (savedChapters) {
+                chapters = JSON.parse(savedChapters);
+                renderChapterList();
+            }
+
+            document.getElementById('birth-date').addEventListener('change', (e) => {
                 localStorage.setItem('fs_dob', e.target.value);
-                renderGrid(dob);
+                render(); 
             });
+
+            document.getElementById('target-age').addEventListener('change', (e) => {
+                let val = parseInt(e.target.value);
+                if (val < 1) val = 1; if (val > 150) val = 150;
+                targetLifespan = val;
+                localStorage.setItem('fs_lifespan', targetLifespan);
+                render();
+            });
+
+            render();
         });
 
-        function renderGrid(dob) {
-            const grid = document.getElementById('life-grid');
-            grid.innerHTML = ''; // Clear existing
+        // --- Chapter Logic ---
+        function addChapter() {
+            const title = document.getElementById('chap-title').value;
+            const start = document.getElementById('chap-start').value;
+            const end = document.getElementById('chap-end').value;
+            const color = document.getElementById('chap-color').value;
 
-            const now = new Date();
-            // Calculate weeks lived
-            const diffTime = Math.abs(now - dob);
-            const weeksLived = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
-            
-            // Update Stats
-            const percent = ((weeksLived / TOTAL_WEEKS) * 100).toFixed(1);
-            document.getElementById('lived-pct').innerText = percent + '%';
-            document.getElementById('weeks-left').innerText = (TOTAL_WEEKS - weeksLived).toLocaleString();
-            document.getElementById('stats-area').style.display = 'flex';
-
-            // Fragment for performance
-            const fragment = document.createDocumentFragment();
-
-            for (let i = 0; i < TOTAL_WEEKS; i++) {
-                const div = document.createElement('div');
-                div.classList.add('week-box');
-
-                // Calculate age for this box
-                const ageYear = Math.floor(i / 52);
-                div.setAttribute('data-age', `Age: ${ageYear}`);
-
-                if (i < weeksLived) {
-                    div.classList.add('past');
-                } else if (i === weeksLived) {
-                    div.classList.add('current');
-                    div.setAttribute('title', 'This Week');
-                } else {
-                    div.classList.add('future');
-                }
-
-                fragment.appendChild(div);
+            if (!title || !start || !end) {
+                alert("Please fill in all fields");
+                return;
+            }
+            if (new Date(start) > new Date(end)) {
+                alert("Start date must be before end date");
+                return;
             }
 
-            grid.appendChild(fragment);
+            chapters.push({ title, start, end, color });
+            saveChapters();
+            renderChapterList();
+            render(); // Re-render grid to show colors
+            
+            // Clear inputs
+            document.getElementById('chap-title').value = '';
+        }
+
+        function deleteChapter(index) {
+            chapters.splice(index, 1);
+            saveChapters();
+            renderChapterList();
+            render();
+        }
+
+        function saveChapters() {
+            localStorage.setItem('fs_chapters', JSON.stringify(chapters));
+        }
+
+        function renderChapterList() {
+            const list = document.getElementById('chapter-list');
+            list.innerHTML = '';
+            chapters.forEach((chap, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'chapter-tag';
+                tag.style.backgroundColor = chap.color;
+                tag.innerHTML = `
+                    <span>${chap.title}</span>
+                    <button class="btn-del" onclick="deleteChapter(${index})">×</button>
+                `;
+                list.appendChild(tag);
+            });
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            render();
+        }
+
+        function render() {
+            const dobStr = document.getElementById('birth-date').value;
+            const dob = new Date(dobStr);
+            const now = new Date();
+            
+            renderDecadeGrid(dob, now);
+            
+            if (lifeInterval) clearInterval(lifeInterval);
+            updateClockTick(dob); 
+            lifeInterval = setInterval(() => updateClockTick(dob), 1000);
+        }
+
+        function renderDecadeGrid(dob, now) {
+            const container = document.getElementById('life-container');
+            container.innerHTML = '';
+
+            // Calculate total units lived
+            let totalUnitsLived;
+            if (currentMode === 'years') totalUnitsLived = now.getFullYear() - dob.getFullYear();
+            else if (currentMode === 'months') totalUnitsLived = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
+            else totalUnitsLived = Math.floor(Math.abs(now - dob) / (1000 * 60 * 60 * 24 * 7));
+
+            // Stats Update
+            let totalUnitsGlobal;
+            if (currentMode === 'years') totalUnitsGlobal = targetLifespan;
+            else if (currentMode === 'months') totalUnitsGlobal = targetLifespan * 12;
+            else totalUnitsGlobal = targetLifespan * 52;
+
+            const pct = Math.min(100, Math.max(0, (totalUnitsLived / totalUnitsGlobal) * 100)).toFixed(1);
+            document.getElementById('stat-lived').innerText = `${pct}%`;
+            document.getElementById('stat-left').innerText = `${(totalUnitsGlobal - totalUnitsLived).toLocaleString()} ${currentMode}`;
+
+            // Loop through decades
+            for (let decade = 0; decade < targetLifespan; decade += 10) {
+                const startYear = decade;
+                const endYear = Math.min(decade + 10, targetLifespan);
+                const yearsInBlock = endYear - startYear;
+                
+                if (yearsInBlock <= 0) break;
+
+                const section = document.createElement('div');
+                section.className = 'decade-section';
+
+                const label = document.createElement('div');
+                label.className = 'decade-label';
+                label.innerText = `The ${decade}s`;
+                section.appendChild(label);
+
+                const grid = document.createElement('div');
+                grid.className = `decade-grid mode-${currentMode}`;
+                
+                let unitsInBlock;
+                if (currentMode === 'years') unitsInBlock = yearsInBlock;
+                else if (currentMode === 'months') unitsInBlock = yearsInBlock * 12;
+                else unitsInBlock = yearsInBlock * 52;
+
+                for (let i = 0; i < unitsInBlock; i++) {
+                    const div = document.createElement('div');
+                    div.classList.add('life-box');
+
+                    // 1. Calculate Global Index
+                    let globalIndex;
+                    if (currentMode === 'years') globalIndex = startYear + i;
+                    else if (currentMode === 'months') globalIndex = (startYear * 12) + i;
+                    else globalIndex = (startYear * 52) + i;
+
+                    // 2. Calculate Actual Age
+                    let age;
+                    if (currentMode === 'years') age = globalIndex;
+                    else if (currentMode === 'months') age = Math.floor(globalIndex / 12);
+                    else age = Math.floor(globalIndex / 52);
+
+                    // 3. Calculate Date of this Box (Approximation)
+                    let boxDate = new Date(dob);
+                    if (currentMode === 'years') boxDate.setFullYear(dob.getFullYear() + globalIndex);
+                    else if (currentMode === 'months') boxDate.setMonth(dob.getMonth() + globalIndex);
+                    else boxDate.setDate(dob.getDate() + (globalIndex * 7));
+
+                    // 4. Check Chapters (Does this box fall into a chapter?)
+                    let activeChapter = null;
+                    // Check reverse so later chapters overwrite earlier ones if overlapping
+                    for (let c = chapters.length - 1; c >= 0; c--) {
+                        const cStart = new Date(chapters[c].start);
+                        const cEnd = new Date(chapters[c].end);
+                        if (boxDate >= cStart && boxDate <= cEnd) {
+                            activeChapter = chapters[c];
+                            break;
+                        }
+                    }
+
+                    // 5. Apply Styles
+                    if (activeChapter) {
+                        div.style.backgroundColor = activeChapter.color;
+                        // Optional: remove opacity if it's a chapter, to make color pop
+                        div.style.opacity = '1'; 
+                    } else {
+                        // Default Health Gradient (Only if no chapter)
+                        if (globalIndex >= totalUnitsLived) {
+                            if (age >= 75) div.classList.add('decline-2');
+                            else if (age >= 60) div.classList.add('decline-1');
+                            else div.classList.add('prime');
+                        }
+                    }
+
+                    // 6. Tooltip & Milestones
+                    let tooltipText = "";
+                    let extraInfo = "";
+
+                    const isStartOfAge = (currentMode === 'years') || 
+                                         (currentMode === 'months' && globalIndex % 12 === 0) || 
+                                         (currentMode === 'weeks' && globalIndex % 52 === 0);
+
+                    if (isStartOfAge && MILESTONES[age]) {
+                        extraInfo += `\n💡 ${MILESTONES[age]}`;
+                        div.classList.add('milestone');
+                    }
+                    
+                    if (activeChapter) {
+                        extraInfo += `\n📘 ${activeChapter.title}`;
+                    }
+
+                    if (currentMode === 'years') {
+                        tooltipText = `Age ${globalIndex}`;
+                    } else if (currentMode === 'months') {
+                        const m = globalIndex % 12 + 1;
+                        tooltipText = `Age ${age}, Month ${m}`;
+                    } else {
+                        const w = globalIndex % 52 + 1;
+                        tooltipText = `Age ${age}, Week ${w}`;
+                    }
+
+                    div.setAttribute('data-info', tooltipText + extraInfo);
+
+                    // 7. Status (Past/Current) - Only apply default gray if NO chapter
+                    if (globalIndex < totalUnitsLived) {
+                        if (!activeChapter) div.classList.add('past');
+                    } else if (globalIndex === totalUnitsLived) {
+                        div.classList.add('current');
+                    }
+
+                    grid.appendChild(div);
+                }
+
+                section.appendChild(grid);
+                container.appendChild(section);
+            }
+        }
+
+        function updateClockTick(dob) {
+            const birthDate = new Date(dob);
+            const deathDate = new Date(birthDate);
+            deathDate.setFullYear(birthDate.getFullYear() + targetLifespan);
+            
+            const now = new Date();
+            let diff = deathDate - now;
+
+            if (diff <= 0) {
+                document.querySelectorAll('.digit-group span:first-child').forEach(el => el.innerText = "00");
+                return;
+            }
+
+            const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+            diff -= years * (1000 * 60 * 60 * 24 * 365.25);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+            const minutes = Math.floor(diff / (1000 * 60));
+            diff -= minutes * (1000 * 60);
+            const seconds = Math.floor(diff / 1000);
+
+            document.getElementById('lc-years').innerText = years;
+            document.getElementById('lc-days').innerText = String(days).padStart(3, '0');
+            document.getElementById('lc-hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('lc-min').innerText = String(minutes).padStart(2, '0');
+            document.getElementById('lc-sec').innerText = String(seconds).padStart(2, '0');
         }
     </script>
 </body>
